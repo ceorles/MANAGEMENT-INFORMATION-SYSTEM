@@ -1,10 +1,6 @@
-from django.urls import path, include
-from rest_framework import routers
-from library.views import StudentViewSet
-
-router = routers.DefaultRouter()
-router.register(r'students', StudentViewSet)
+from django.urls import path
+from .views import StudentSignupView
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('signup/student/', StudentSignupView.as_view(), name='student-signup'),
 ]

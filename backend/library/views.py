@@ -1,9 +1,9 @@
-from django.shortcuts import render
-from rest_framework import viewsets
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
+from .serializers import StudentSignupSerializer
 from .models import Student
-from .serializers import StudentSerializer
 
-class StudentViewSet(viewsets.ModelViewSet):
+class StudentSignupView(generics.CreateAPIView):
     queryset = Student.objects.all()
-    serializer_class = StudentSerializer
-
+    serializer_class = StudentSignupSerializer
+    permission_classes = [AllowAny] # Allow anyone to sign up (no login required)
