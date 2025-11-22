@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Student
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 
 class StudentSignupSerializer(serializers.ModelSerializer):
     name = serializers.CharField(write_only=True)
@@ -40,3 +42,24 @@ class StudentSignupSerializer(serializers.ModelSerializer):
         )
 
         return student
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        # 1. Generate the standard token (access & refresh)
+        data = super().validate(attrs)
+
+        # 2. Add custom data to the response
+        data['username'] = self.user.username
+        data['email'] = self.user.email
+        data['is_superuser'] = self.user.is_superuser
+
+        # 3. Check if user is a Student and add that info
+        # We use try/except because Admins won't have a 'student_profile'
+        try:
+            data['student_id'] = self.user.student_profile.student_id
+            data['role'] = 'student'
+        except:
+            data['role'] = 'admin' if self.user.is_superuser else 'user'
+
+        return data
