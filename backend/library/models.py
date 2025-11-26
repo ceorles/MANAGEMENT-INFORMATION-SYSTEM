@@ -16,3 +16,10 @@ class Student(models.Model):
     
     def __str__(self):
         return f"{self.student_id} - {self.user.first_name}"
+    
+class Librarian(models.Model):
+    # Link this librarian to a login account
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='librarian_profile')
+    
+    def __str__(self):
+        return f"Librarian: {self.user.username}"

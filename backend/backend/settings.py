@@ -26,10 +26,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&e+56-75f^)sj56ol+_pog515q!#f=s7)=%bz*rn!bii3rc6kn'
+# SECRET_KEY = 'django-insecure-&e+56-75f^)sj56ol+_pog515q!#f=s7)=%bz*rn!bii3rc6kn'
+
+# UPDATE
+SECRET_KEY = os.getenv("SECRET_KEY")
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -46,6 +50,7 @@ INSTALLED_APPS = [
     'library',
     'corsheaders', # Corsheader - don't remove comment
     'rest_framework', # Corsheader - don't remove comment
+    'rest_framework_simplejwt.token_blacklist', # Djangorestframework
 ]
 
 MIDDLEWARE = [
@@ -64,7 +69,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -147,6 +152,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = True # Corsheader - don't remove comment
+# CORS_ALLOW_ALL_ORIGINS = True # Corsheader - don't remove comment
+# Add this to allow React (localhost:3000) to talk to Django
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 
 #AUTH_USER_MODEL = 'library.User'
