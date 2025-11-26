@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Student, Librarian 
+from .models import Student, Librarian, Book, BorrowRecord
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+
+# Authentication
 class StudentSignupSerializer(serializers.ModelSerializer):
     name = serializers.CharField(write_only=True)
     email = serializers.EmailField(write_only=True)
@@ -128,3 +130,27 @@ class MyTokenObtainPairSerializerLibrarian(TokenObtainPairSerializer):
             data['role'] = 'admin' if self.user.is_superuser else 'user'
 
         return data
+    
+# Dashboard
+class BookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Book
+        fields = '__all__'
+
+class StudentListSerializer(serializers.ModelSerializer):
+    # For the Librarian to see member details
+    name = serializers.CharField(source='user.first_name')
+    email = serializers.CharField(source='user.email')
+
+    class Meta:
+        model = Student
+        fields = ['student_id', 'name', 'email', 'contact_number', 'sex']
+
+class BorrowRecordSerializer(serializers.ModelSerializer):
+    # Nested info so the librarian sees Names instead of IDs
+    student_name = serializers.CharField(source='student.user.first_name', read_only=True)
+    book_title = serializers.CharField(source='book.title', read_only=True)
+
+    class Meta:
+        model = BorrowRecord
+        fields = ['id', 'student_name', 'book_title', 'borrow_date', 'is_returned']

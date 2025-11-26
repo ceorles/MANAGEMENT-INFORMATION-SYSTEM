@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+# Authentication
 class Student(models.Model):
     SEX_CHOICES = [
         ('Male', 'Male'),
@@ -23,3 +24,22 @@ class Librarian(models.Model):
     
     def __str__(self):
         return f"Librarian: {self.user.username}"
+    
+# Dashboard
+class Book(models.Model):
+    title = models.CharField(max_length=200)
+    author = models.CharField(max_length=200)
+    isbn = models.CharField(max_length=20, unique=True)
+    quantity = models.IntegerField(default=1) # How many copies available
+    
+    def __str__(self):
+        return self.title
+
+class BorrowRecord(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    borrow_date = models.DateField(auto_now_add=True)
+    is_returned = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.student.user.username} borrowed {self.book.title}"

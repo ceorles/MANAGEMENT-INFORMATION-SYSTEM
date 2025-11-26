@@ -26,21 +26,34 @@
 // }
 
 // export default App; 
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout';
+import Landing from './pages/Landing';
 import Login from './pages/login';
-import Signup from './pages/signup';
+import Signup from './pages/signup'; // We will update this next
+import StudentDashboard from './pages/StudentDashboard';
+import LibrarianDashboard from './pages/LibrarianDashboard';
 import './App.css';
 
 function App() {
   return (
     <Router>
-      <Layout> {/* This wraps every page with the Navbar/CSS */}
+      <Layout>
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          <Route path="/" element={<Landing />} />
+
+          {/* LOGIN ROUTES */}
+          <Route path="/login/student" element={<Login userType="student" />} />
+          <Route path="/login/librarian" element={<Login userType="librarian" />} />
+
+          {/* SIGNUP ROUTES (Distinct for each role) */}
+          <Route path="/signup/student" element={<Signup userType="student" />} />
+          <Route path="/signup/librarian" element={<Signup userType="librarian" />} />
+
+          {/* DASHBOARDS */}
+          <Route path="/student-dashboard" element={<StudentDashboard />} />
+          <Route path="/librarian-dashboard" element={<LibrarianDashboard />} />
         </Routes>
       </Layout>
     </Router>
