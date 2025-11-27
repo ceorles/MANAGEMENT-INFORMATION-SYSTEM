@@ -1,19 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// Removed 'Link' import because the button is now in the Navbar
 
 const Signup = ({ userType }) => {
     const navigate = useNavigate();
     const title = userType ? userType.charAt(0).toUpperCase() + userType.slice(1) : "User";
     
-    // Combined state for both roles
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        username: '', // Librarians need explicit username
+        username: '',
         password: '',
         confirm_password: '',
-        // Student Specific Fields
         student_id: '',
         contact_number: '',
         sex: 'Male'
@@ -26,7 +23,6 @@ const Signup = ({ userType }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // 1. Determine the API URL based on userType
         const apiUrl = userType === 'student' 
             ? 'http://127.0.0.1:8000/api/signup/student/' 
             : 'http://127.0.0.1:8000/api/signup/librarian/';
@@ -41,10 +37,8 @@ const Signup = ({ userType }) => {
 
             if (response.ok) {
                 alert(`${title} Account created successfully!`);
-                // Redirect back to the correct login page
                 navigate(`/login/${userType}`); 
             } else {
-                // Display error (e.g., "Email already taken")
                 alert("Error: " + JSON.stringify(data));
             }
         } catch (error) {
@@ -69,7 +63,6 @@ const Signup = ({ userType }) => {
                     <input type="email" name="email" placeholder="email@address.com" onChange={handleChange} required />
                 </div>
 
-                {/* --- LIBRARIAN SPECIFIC FIELDS --- */}
                 {userType === 'librarian' && (
                     <div className="form-group">
                         <label>Username:</label>
@@ -77,7 +70,6 @@ const Signup = ({ userType }) => {
                     </div>
                 )}
 
-                {/* --- STUDENT SPECIFIC FIELDS --- */}
                 {userType === 'student' && (
                     <>
                         <div className="form-group">
@@ -117,7 +109,6 @@ const Signup = ({ userType }) => {
 
                 <button type="submit" className="submit-btn">Sign-Up</button>
 
-                {/* LINK REMOVED (Moved to Top Right Navbar via Layout.jsx) */}
             </form>
         </div>
     );

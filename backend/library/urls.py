@@ -9,6 +9,11 @@ from .views import (
     BorrowBookView,
     MemberListView,
     TransactionListView,
+    StudentDetailView,
+    BookDetailView,
+    RelatedBooksView,
+    StudentBorrowedBooksView,
+    ReturnBookView,
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -30,4 +35,13 @@ urlpatterns = [
     # Librarian URLs
     path('api/members/', MemberListView.as_view(), name='member_list'),
     path('api/transactions/', TransactionListView.as_view(), name='transaction_list'),
+    
+    # URL to Edit/Delete a specific member
+    path('api/members/<str:student_id>/', StudentDetailView.as_view(), name='member_detail'),
+
+    path('api/books/<int:pk>/', BookDetailView.as_view(), name='book_detail'),
+    path('api/books/related/', RelatedBooksView.as_view(), name='related_books'),
+
+    path('api/student/borrowed-books/', StudentBorrowedBooksView.as_view(), name='student_borrowed'),
+    path('api/return/', ReturnBookView.as_view(), name='return_book'),
 ]

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-// Removed 'Link' import because the button is now in the Navbar
+import { useNavigate, Link } from 'react-router-dom';
+import { FaArrowLeft } from 'react-icons/fa';
 
 const Login = ({ userType }) => {
     const [formData, setFormData] = useState({ username: '', password: '' });
@@ -23,8 +23,13 @@ const Login = ({ userType }) => {
             if (response.ok) {
                 localStorage.setItem('access_token', data.access);
                 localStorage.setItem('role', data.role);
+                // Save name for the dashboard
+                localStorage.setItem('user_name', data.name); 
                 
-                // Security Check: Prevent Students from logging in via Librarian page
+                if (data.student_id) {
+                    localStorage.setItem('student_id', data.student_id);
+                }
+
                 if (userType && data.role !== userType) {
                    alert(`Error: You are a ${data.role}, but you tried to log in as a ${userType}.`);
                    return;
@@ -47,6 +52,22 @@ const Login = ({ userType }) => {
     return (
         <div className="split-screen">
             <div className="split-left">
+                
+                <Link to="/" style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    color: '#8B6508',
+                    textDecoration: 'none',
+                    fontWeight: 'bold',
+                    marginBottom: '30px',
+                    width: 'fit-content',
+                    fontSize: '16px'
+                }}>
+                    <FaArrowLeft /> Back
+                </Link>
+                {/* --------------------------- */}
+
                 <h2>{title} Log-In</h2>
                 
                 <form onSubmit={handleSubmit}>
@@ -69,8 +90,6 @@ const Login = ({ userType }) => {
                         />
                     </div>
                     <button type="submit" className="submit-btn">Log - In</button>
-                    
-                    {/* LINK REMOVED (Moved to Top Right Navbar via Layout.jsx) */}
                 </form>
             </div>
             <div className="split-right">

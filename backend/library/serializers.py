@@ -46,15 +46,12 @@ class StudentSignupSerializer(serializers.ModelSerializer):
 
 class MyTokenObtainPairSerializerStudent(TokenObtainPairSerializer):
     def validate(self, attrs):
-        # 1. Generate the standard token (access & refresh)
         data = super().validate(attrs)
 
-        # 2. Add custom data to the response
         data['username'] = self.user.username
         data['email'] = self.user.email
         data['is_superuser'] = self.user.is_superuser
 
-        # 3. Check if user is a Student and add that info
         try:
             data['student_id'] = self.user.student_profile.student_id
             data['role'] = 'student'
@@ -65,7 +62,6 @@ class MyTokenObtainPairSerializerStudent(TokenObtainPairSerializer):
 
 # Librarian
 class LibrarianSignupSerializer(serializers.ModelSerializer):
-    # Fields based on the Librarian Sign-Up image
     name = serializers.CharField(write_only=True)
     username = serializers.CharField(write_only=True) # Explicit username field
     email = serializers.EmailField(write_only=True)
@@ -95,7 +91,6 @@ class LibrarianSignupSerializer(serializers.ModelSerializer):
         username = validated_data.pop('username')
         name = validated_data.pop('name')
 
-        # Create the Django User
         user = User.objects.create_user(
             username=username, 
             email=email,
@@ -103,7 +98,6 @@ class LibrarianSignupSerializer(serializers.ModelSerializer):
             first_name=name 
         )
 
-        # Create the Librarian profile linked to that user
         librarian = Librarian.objects.create(
             user=user
         )
@@ -112,15 +106,15 @@ class LibrarianSignupSerializer(serializers.ModelSerializer):
 
 class MyTokenObtainPairSerializerLibrarian(TokenObtainPairSerializer):
     def validate(self, attrs):
-        # 1. Generate the standard token
         data = super().validate(attrs)
 
-        # 2. Add custom data
         data['username'] = self.user.username
         data['email'] = self.user.email
         data['is_superuser'] = self.user.is_superuser
+        
+        data['name'] = self.user.first_name 
 
-        # 3. Determine Role (Student vs Librarian vs Admin)
+        # Student vs Librarian vs Admin
         if hasattr(self.user, 'student_profile'):
             data['role'] = 'student'
             data['student_id'] = self.user.student_profile.student_id
@@ -138,18 +132,40 @@ class BookSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class StudentListSerializer(serializers.ModelSerializer):
-    # For the Librarian to see member details
     name = serializers.CharField(source='user.first_name')
-    email = serializers.CharField(source='user.email')
+    email = serializers.CharField(source='user.email', read_only=True) 
+    
+    password = serializers.CharField(write_only=True, required=False) 
 
     class Meta:
         model = Student
-        fields = ['student_id', 'name', 'email', 'contact_number', 'sex']
+        fields = ['student_id', 'name', 'email', 'contact_number', 'sex', 'password']
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', {})
+        
+        if 'first_name' in user_data:
+            instance.user.first_name = user_data['first_name']
+        
+        password = validated_data.pop('password', None)
+        if password:
+            instance.user.set_password(password)
+            
+        instance.user.save()
+        
+        instance.student_id = validated_data.get('student_id', instance.student_id)
+        instance.contact_number = validated_data.get('contact_number', instance.contact_number)
+        instance.sex = validated_data.get('sex', instance.sex)
+        instance.save()
+        
+        return instance
 
 class BorrowRecordSerializer(serializers.ModelSerializer):
-    # Nested info so the librarian sees Names instead of IDs
     student_name = serializers.CharField(source='student.user.first_name', read_only=True)
     book_title = serializers.CharField(source='book.title', read_only=True)
+
+    book_cover = serializers.ImageField(source='book.cover_image', read_only=True)
+    book_synopsis = serializers.CharField(source='book.synopsis', read_only=True)
 
     class Meta:
         model = BorrowRecord

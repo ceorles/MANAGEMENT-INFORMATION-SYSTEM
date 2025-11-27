@@ -1,7 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import StudentNavbar from '../components/StudentNavbar';
+import { FaSearch } from 'react-icons/fa';
+import '../styles/Student.css'; 
 
 const StudentDashboard = () => {
     const [books, setBooks] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const categories = [
+        { key: 'Academic', label: 'Academic / Educational' },
+        { key: 'Fiction', label: 'Fiction' },
+        { key: 'Non-Fiction', label: 'Non-Fiction' },
+        { key: 'Modern', label: 'Modern Literature' },
+        { key: 'Graphic', label: 'Graphic Literature' },
+        { key: 'Children', label: 'Children Books' },
+    ];
 
     useEffect(() => {
         fetchBooks();
@@ -9,54 +23,88 @@ const StudentDashboard = () => {
 
     const fetchBooks = async () => {
         const token = localStorage.getItem('access_token');
-        const response = await fetch('http://127.0.0.1:8000/api/books/', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await response.json();
-        setBooks(data);
-    };
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/books/', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
 
-    const handleBorrow = async (bookId) => {
-        const token = localStorage.getItem('access_token');
-        const response = await fetch('http://127.0.0.1:8000/api/borrow/', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` 
-            },
-            body: JSON.stringify({ book_id: bookId })
-        });
-        
-        if (response.ok) {
-            alert("Book borrowed successfully!");
-            fetchBooks(); // Refresh list to update quantity
-        } else {
-            alert("Failed to borrow book.");
+            if (Array.isArray(data)) {
+                setBooks(data);
+            } else {
+                console.error("API Error:", data);
+                setBooks([]); // Must be empty
+            }
+
+        } catch (error) {
+            console.error("Error fetching books:", error);
+            setBooks([]);
         }
     };
 
+    const filteredBooks = books.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase()));
+
     return (
         <div>
-            <h2>Student Space</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-                {books.map(book => (
-                    <div key={book.id} style={{ border: '2px solid #8B6508', padding: '15px', borderRadius: '10px' }}>
-                        <h3>{book.title}</h3>
-                        <p>Author: {book.author}</p>
-                        <p>Available: {book.quantity}</p>
-                        <button 
-                            className="submit-btn" 
-                            style={{width: '100%', marginTop: '10px'}}
-                            onClick={() => handleBorrow(book.id)}
-                            disabled={book.quantity === 0}
-                        >
-                            {book.quantity > 0 ? 'Borrow Book' : 'Out of Stock'}
-                        </button>
+            <StudentNavbar />
+            
+            <div className="student-container">
+                {/* Search Bar */}
+                <div className="search-wrapper">
+                    <FaSearch className="search-icon"/>
+                    <input 
+                        type="text" 
+                        placeholder="Search for a Book" 
+                        className="student-search"
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+
+                {searchTerm ? (
+                    <div className="book-grid">
+                        {filteredBooks.map(book => (
+                            <BookCard key={book.id} book={book} />
+                        ))}
                     </div>
-                ))}
+                ) : (
+                    categories.map(cat => {
+                        const booksInCat = books.filter(b => b.category === cat.key);
+                        if (booksInCat.length === 0) return null;
+
+                        return (
+                            <div key={cat.key} className="category-section">
+                                <h3>{cat.label}</h3>
+                                <div className="book-row">
+                                    {booksInCat.map(book => (
+                                        <BookCard key={book.id} book={book} />
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })
+                )}
             </div>
         </div>
     );
 };
+
+// Reusable Card
+const BookCard = ({ book }) => (
+    <Link to={`/student/book/${book.id}`} className="book-card-link">
+        <div className="book-card">
+            <div className="book-cover">
+                {book.cover_image ? (
+                    <img src={`http://127.0.0.1:8000${book.cover_image}`} alt={book.title} />
+                ) : (
+                    <div className="no-cover">No Image</div>
+                )}
+            </div>
+            <div className="book-info">
+                <h4>{book.title}</h4>
+                <p>{book.category}</p>
+            </div>
+        </div>
+    </Link>
+);
 
 export default StudentDashboard;

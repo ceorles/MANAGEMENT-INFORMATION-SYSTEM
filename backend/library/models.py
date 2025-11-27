@@ -8,7 +8,7 @@ class Student(models.Model):
         ('Female', 'Female'),
     ]
 
-    # Link this student to a login account
+    # student login
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
     
     student_id = models.CharField(max_length=20, unique=True)
@@ -19,7 +19,7 @@ class Student(models.Model):
         return f"{self.student_id} - {self.user.first_name}"
     
 class Librarian(models.Model):
-    # Link this librarian to a login account
+    # librarian login
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='librarian_profile')
     
     def __str__(self):
@@ -27,11 +27,25 @@ class Librarian(models.Model):
     
 # Dashboard
 class Book(models.Model):
+    CATEGORY_CHOICES = [
+        ('Academic', 'Academic/Educational'),
+        ('Fiction', 'Fiction'),
+        ('Non-Fiction', 'Non-Fiction'),
+        ('Modern', 'Modern Literature'),
+        ('Graphic', 'Graphic Literature'),
+        ('Children', 'Children Books'),
+    ]
+
     title = models.CharField(max_length=200)
     author = models.CharField(max_length=200)
     isbn = models.CharField(max_length=20, unique=True)
-    quantity = models.IntegerField(default=1) # How many copies available
+    quantity = models.IntegerField(default=1)
     
+    # New Fields for the layout
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='Fiction')
+    synopsis = models.TextField(blank=True, null=True)
+    cover_image = models.ImageField(upload_to='book_covers/', blank=True, null=True) # Requires Pillow
+
     def __str__(self):
         return self.title
 

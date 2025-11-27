@@ -100,7 +100,7 @@ input {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 80vh; /* Centers vertically */
+    height: 80vh;
     text-align: center;
 }
 
@@ -124,7 +124,7 @@ input {
     justify-content: center;
     width: 250px;
     padding: 15px;
-    background-color: #8B6508; /* Your Theme Brown */
+    background-color: #8B6508;
     color: white;
     text-decoration: none;
     font-size: 20px;

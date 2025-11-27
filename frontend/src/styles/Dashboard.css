@@ -1,0 +1,241 @@
+/* Sidebar Layout */
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* LEFT SIDEBAR */
+.sidebar {
+    width: 260px;
+    background-color: #fff;
+    border-right: 2px solid #8B6508;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    position: fixed;
+    height: 100%;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.profile-section {
+    text-align: center;
+    margin-bottom: 40px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 20px;
+}
+
+.avatar-circle img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #8B6508;
+    margin-bottom: 10px;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #8B6508;
+    font-weight: bold;
+    font-size: 16px;
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+.sidebar-link:hover, .sidebar-link.active {
+    background-color: #fcf8e3;
+    border: 1px solid #8B6508;
+}
+
+.icon { font-size: 20px; }
+
+/* MAIN CONTENT AREA */
+.main-content {
+    margin-left: 260px;
+    flex: 1;
+    padding: 40px;
+    background-color: #fff;
+}
+
+/* MEMBER TABLE CARD */
+.card {
+    border: 2px solid #8B6508;
+    border-radius: 20px;
+    padding: 20px;
+    background: white;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-bar {
+    padding: 8px 15px;
+    border: 1px solid #8B6508;
+    border-radius: 20px;
+    width: 300px;
+    outline: none;
+}
+
+/* TABLE STYLES */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background-color: #E8E0D5;
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+    color: #000;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+tr:nth-child(even) { background-color: #f9f9f9; }
+
+/* ACTION BUTTONS */
+.action-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 18px;
+    margin: 0 5px;
+}
+.edit-btn { color: #8B6508; }
+.delete-btn { color: #cc0000; }
+
+/* FOOTER BUTTONS */
+.card-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.footer-btn {
+    background-color: black;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.print-btn { background-color: black; }
+.download-btn { background-color: black; }
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* The actual white box */
+.modal-box {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    width: 400px;
+    max-width: 90%;
+    border: 2px solid #8B6508;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.modal-header {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* Input fields inside the modal */
+.modal-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+/* Button container */
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* Modal Buttons */
+.btn-confirm {
+    background-color: #8B6508;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-delete-confirm {
+    background-color: #cc0000;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-cancel {
+    background-color: #ccc;
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-confirm:hover { background-color: #6d4e05; }
+.btn-delete-confirm:hover { background-color: #990000; }
+.btn-cancel:hover { background-color: #aaa; }
