@@ -1,28 +1,28 @@
 
 import './App.css';
-
-import { useEffect, useState } from "react";
-import axios from "axios";
+import RoleSelect from './pages/RoleSelect';
+import MemberLogin from './pages/MemberLogin';
+import MemberRegister from './pages/MemberRegister';
+import LibrarianLogin from './pages/LibrarianLogin';
+import LibrarianRegister from './pages/LibrarianRegister';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import BorrowedBooks from './pages/BorrowedBooks';
+import LibrarianHome from './pages/LibrarianHome';
 
 function App() {
-    const [students, setStudents] = useState([]);
-
-    useEffect(() => {
-        axios.get("http://localhost:8000/api/students/")
-        .then(response => setStudents(response.data))
-        .catch(error => console.log(error));
-    }, []);
-
-    return (
-        <div>
-        <h1>Students</h1>
-        {students.map(student => (
-            <p key={student.id}>
-            {student.name} - Grade {student.grade}
-            </p>
-        ))}
-        </div>
-    );
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<RoleSelect />} />
+        <Route path="/member-login" element={<MemberLogin />} />
+        <Route path="/member-register" element={<MemberRegister />} />
+        <Route path="/librarian-login" element={<LibrarianLogin />} />
+        <Route path="/librarian-register" element={<LibrarianRegister />} />
+        <Route path="/borrowed-books" element={<BorrowedBooks />} />
+        <Route path="/librarian-home" element={<LibrarianHome />} />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;
