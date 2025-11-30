@@ -19,8 +19,8 @@ class Student(models.Model):
         return f"{self.student_id} - {self.user.first_name}"
     
 class Librarian(models.Model):
-    # librarian login
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='librarian_profile')
+    profile_picture = models.ImageField(upload_to='librarian_profiles/', blank=True, null=True)
     
     def __str__(self):
         return f"Librarian: {self.user.username}"
@@ -41,7 +41,6 @@ class Book(models.Model):
     isbn = models.CharField(max_length=20, unique=True)
     quantity = models.IntegerField(default=1)
     
-    # New Fields for the layout
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='Fiction')
     synopsis = models.TextField(blank=True, null=True)
     cover_image = models.ImageField(upload_to='book_covers/', blank=True, null=True) # Requires Pillow
@@ -50,10 +49,20 @@ class Book(models.Model):
         return self.title
 
 class BorrowRecord(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Returned', 'Returned'),
+        ('Rejected', 'Rejected'),
+    ]
+
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     borrow_date = models.DateField(auto_now_add=True)
-    is_returned = models.BooleanField(default=False)
+
+    is_returned = models.BooleanField(default=False) 
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    return_date = models.DateField(null=True, blank=True) 
 
     def __str__(self):
-        return f"{self.student.user.username} borrowed {self.book.title}"
+        return f"{self.student.user.username} - {self.book.title} ({self.status})"

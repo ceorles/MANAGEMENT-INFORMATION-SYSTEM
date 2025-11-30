@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaUserCircle } from 'react-icons/fa';
-import '../styles/Student.css';
+import '../styles/Student.css'; 
 
 const StudentNavbar = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [name, setName] = useState('');
-    const [showDropdown, setShowDropdown] = useState(false); // State to toggle menu
+    const [showDropdown, setShowDropdown] = useState(false);
 
     useEffect(() => {
         setName(localStorage.getItem('user_name') || 'Student');
@@ -16,6 +17,9 @@ const StudentNavbar = () => {
         localStorage.clear();
         navigate('/');
     };
+
+    // active path
+    const isActive = (path) => location.pathname === path ? 'nav-link active' : 'nav-link';
 
     return (
         <nav className="student-navbar">
@@ -28,8 +32,8 @@ const StudentNavbar = () => {
             </div>
             
             <div className="navbar-links">
-                <Link to="/student-dashboard" className="nav-link">Borrow Books</Link>
-                <Link to="/student/return" className="nav-link">Return Books</Link>
+                <Link to="/student-dashboard" className={isActive('/student-dashboard')}>Home</Link>
+                <Link to="/student/return" className={isActive('/student/return')}>Book History</Link>
                 
                 <div className="profile-container">
                     <FaUserCircle 
@@ -40,14 +44,10 @@ const StudentNavbar = () => {
 
                     {showDropdown && (
                         <div className="profile-dropdown">
-                            <div className="dropdown-arrow"></div>
-                            <div className="dropdown-item name">
-                                {name}
-                            </div>
+                            <div className="dropdown-arrow"></div> 
+                            <div className="dropdown-item name">{name}</div>
                             <div className="dropdown-divider"></div>
-                            <div className="dropdown-item logout" onClick={handleLogout}>
-                                Logout
-                            </div>
+                            <div className="dropdown-item logout" onClick={handleLogout}>Logout</div>
                         </div>
                     )}
                 </div>

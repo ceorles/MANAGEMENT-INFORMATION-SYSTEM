@@ -1,3 +1,7 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+
 :root {
     --primary-brown: #8B6508;
 }
@@ -7,9 +11,6 @@
     min-height: 100vh;
 }
 
-/* Navbar */
-
-/* src/App.css */
 .nav-btn-black {
     background-color: black;
     color: white;
@@ -49,14 +50,12 @@
     cursor: pointer;
 }
 
-/* Container */
 .container {
     padding: 40px;
     max-width: 1200px;
     margin: 0 auto;
 }
 
-/* Inputs */
 .form-group { margin-bottom: 20px; }
 label { display: block; font-weight: bold; margin-bottom: 5px; }
 input {
@@ -82,7 +81,6 @@ input {
 }
 .submit-btn:hover { background-color: #6d4e05; }
 
-/* Layouts */
 .split-screen {
     display: flex;
     align-items: center;
@@ -95,7 +93,6 @@ input {
 
 .signup-container { max-width: 600px; margin: 0 auto; }
 
-/* LANDING */
 .landing-container {
     display: flex;
     justify-content: center;

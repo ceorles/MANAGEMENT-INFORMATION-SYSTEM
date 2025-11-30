@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import StudentNavbar from '../components/StudentNavbar';
-import { FaChevronLeft, FaCheckCircle } from 'react-icons/fa';
+import { FaChevronLeft, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa'; 
 import '../styles/Student.css';
 
 const BorrowForm = () => {
@@ -9,7 +9,9 @@ const BorrowForm = () => {
     const navigate = useNavigate();
     const [book, setBook] = useState(null);
     
-    const [showModal, setShowModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     const [formData, setFormData] = useState({
         name: '',
@@ -55,20 +57,34 @@ const BorrowForm = () => {
                 body: JSON.stringify({ book_id: book.id }) 
             });
             
+            const data = await response.json();
+
             if (response.ok) {
-                setShowModal(true);
+                setShowSuccessModal(true);
             } else {
-                const err = await response.json();
-                alert("Error: " + (err.error || "Could not borrow book."));
+                setErrorMessage(data.error || "Could not borrow book.");
+                setShowErrorModal(true);
             }
         } catch (error) {
             console.error("Error:", error);
+            setErrorMessage("Network error. Please try again.");
+            setShowErrorModal(true);
         }
     };
 
-    const handleCloseModal = () => {
-        setShowModal(false);
-        navigate('/student-dashboard'); // Go back to dashboard
+    const handleCloseSuccess = () => {
+        setShowSuccessModal(false);
+        navigate('/student-dashboard');
+    };
+
+    const handleCloseError = () => {
+        setShowErrorModal(false);
+    };
+
+    const getImageUrl = (path) => {
+        if (!path) return null;
+        if (path.startsWith('http')) return path;
+        return `http://127.0.0.1:8000${path}`;
     };
 
     if (!book) return <div>Loading...</div>;
@@ -82,9 +98,13 @@ const BorrowForm = () => {
                 </button>
 
                 <div className="details-layout">
+                    {/* LEFT - Book Image */}
                     <div className="details-image">
                         {book.cover_image ? (
-                            <img src={`http://127.0.0.1:8000${book.cover_image}`} alt={book.title} />
+                            <img 
+                                src={getImageUrl(book.cover_image)} 
+                                alt={book.title} 
+                            />
                         ) : (
                             <div className="no-cover-large">No Image</div>
                         )}
@@ -92,6 +112,7 @@ const BorrowForm = () => {
                         <p style={{fontWeight:'bold'}}>by {book.author}</p>
                     </div>
 
+                    {/* RIGHT - Form */}
                     <div className="details-info" style={{paddingLeft: '50px'}}>
                         <p style={{fontStyle: 'italic', color: '#555', marginBottom: '20px'}}>
                             Please kindly fill up the forms to borrow the book
@@ -118,7 +139,8 @@ const BorrowForm = () => {
                 </div>
             </div>
 
-            {showModal && (
+            {/* --- SUCCESS POP-OUT BOX --- */}
+            {showSuccessModal && (
                 <div className="modal-overlay">
                     <div className="modal-box">
                         <FaCheckCircle size={50} color="#8B6508" style={{marginBottom: '10px'}} />
@@ -126,8 +148,22 @@ const BorrowForm = () => {
                         <p className="modal-text">
                             The book has been recorded in the Librarian Dashboard.
                         </p>
-                        <button className="btn-modal-ok" onClick={handleCloseModal}>
+                        <button className="btn-modal-ok" onClick={handleCloseSuccess}>
                             OK
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* --- ERROR POP-OUT BOX --- */}
+            {showErrorModal && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <FaExclamationCircle size={50} color="#cc0000" style={{marginBottom: '10px'}} />
+                        <h3 className="modal-header" style={{color: '#cc0000'}}>Oops!</h3>
+                        <p className="modal-text">{errorMessage}</p>
+                        <button className="btn-modal-ok" onClick={handleCloseError} style={{backgroundColor: '#cc0000'}}>
+                            Close
                         </button>
                     </div>
                 </div>

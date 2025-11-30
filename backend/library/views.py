@@ -2,11 +2,56 @@ from django.shortcuts import render
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from .serializers import StudentSignupSerializer, LibrarianSignupSerializer, MyTokenObtainPairSerializerStudent, MyTokenObtainPairSerializerLibrarian, BookSerializer, StudentListSerializer, BorrowRecordSerializer
+from .serializers import StudentSignupSerializer, LibrarianSignupSerializer, MyTokenObtainPairSerializerStudent, MyTokenObtainPairSerializerLibrarian, BookSerializer, StudentListSerializer, BorrowRecordSerializer, LibrarianProfileSerializer 
 from .models import Student, Librarian, Book, BorrowRecord
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
+from django.utils import timezone
+from django.db.models import Count, Sum
+from django.db.models.functions import TruncMonth
 
+class DashboardStatsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        # 1. total books pero hindi kada qty, kada title ng libro ang bilang
+        total_books = Book.objects.count() 
+
+        # bibilangin yung mga na borrow na books
+        total_borrowed = BorrowRecord.objects.count()
+
+        # top 3 borrowed books
+        top_books = Book.objects.annotate(borrow_count=Count('borrowrecord')).order_by('-borrow_count')[:3]
+        top_books_data = [
+            {"title": b.title, "count": b.borrow_count} for b in top_books
+        ]
+
+        # monthly borrowed books
+        monthly_data = (
+            BorrowRecord.objects
+            .annotate(month=TruncMonth('borrow_date'))
+            .values('month')
+            .annotate(count=Count('id'))
+            .order_by('month')
+        )
+        
+        chart_data = [
+            {"name": item['month'].strftime('%b'), "loans": item['count']} 
+            for item in monthly_data
+        ]
+
+        recent_activity = BorrowRecord.objects.all().order_by('-borrow_date')[:5]
+        # serialize para makuha names at dates
+        recent_data = BorrowRecordSerializer(recent_activity, many=True).data
+
+        return Response({
+            "total_books": total_books,
+            "total_borrowed": total_borrowed,
+            "top_books": top_books_data,
+            "chart_data": chart_data,
+            "recent_activity": recent_data
+        })
+    
 class StudentSignupView(generics.CreateAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentSignupSerializer
@@ -20,6 +65,13 @@ class LibrarianSignupView(generics.CreateAPIView):
     serializer_class = LibrarianSignupSerializer
     permission_classes = [AllowAny]
 
+class LibrarianProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = LibrarianProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.librarian_profile
+
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializerLibrarian
 
@@ -31,7 +83,6 @@ class MyTokenObtainPairView(TokenObtainPairView):
 #     return render(request, 'library/signup.html')
 
 # Dashboard
-# --- STUDENT VIEWS ---
 
 class BookListView(generics.ListAPIView):
     # basta books, tangina
@@ -50,14 +101,29 @@ class BorrowBookView(APIView):
             student = user.student_profile
             book = Book.objects.get(id=book_id)
             
-            if BorrowRecord.objects.filter(student=student, book=book, is_returned=False).exists():
-                return Response({"error": "You have already borrowed this book. Please return it first."}, status=status.HTTP_400_BAD_REQUEST)
+            # check kung may pending request, kapag meron bawal na mag request
+            active_loan = BorrowRecord.objects.filter(
+                student=student, 
+                book=book, 
+                status__in=['Pending', 'Approved']
+            ).exists()
 
+            if active_loan:
+                return Response(
+                    {"error": "You already have an active request or copy of this book. You cannot borrow two copies of the same book."}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # cvheck Stock
             if book.quantity > 0:
-                BorrowRecord.objects.create(student=student, book=book)
+                # create pending status
+                BorrowRecord.objects.create(student=student, book=book, status='Pending')
+                
+                # decrease stock
                 book.quantity -= 1
                 book.save()
-                return Response({"message": "Book borrowed successfully!"}, status=status.HTTP_201_CREATED)
+                
+                return Response({"message": "Request submitted! Waiting for Librarian approval."}, status=status.HTTP_201_CREATED)
             else:
                 return Response({"error": "Book out of stock"}, status=status.HTTP_400_BAD_REQUEST)
                 
@@ -71,8 +137,33 @@ class StudentBorrowedBooksView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Return only books that are NOT returned yet for this student
-        return BorrowRecord.objects.filter(student=self.request.user.student_profile, is_returned=False)
+        return BorrowRecord.objects.filter(student=self.request.user.student_profile).order_by('-borrow_date')
+
+class ManageRequestView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        record_id = request.data.get('record_id')
+        action = request.data.get('action')
+        
+        try:
+            record = BorrowRecord.objects.get(id=record_id)
+            
+            if action == 'approve':
+                record.status = 'Approved'
+                record.save()
+                return Response({"message": "Book Approved"})
+            
+            elif action == 'reject':
+                record.status = 'Rejected'
+                record.save()
+                # r-return yung stock kapag ni reject ni librarian
+                record.book.quantity += 1
+                record.book.save()
+                return Response({"message": "Book Rejected"})
+                
+        except BorrowRecord.DoesNotExist:
+            return Response({"error": "Record not found"}, status=404)
 
 class ReturnBookView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -80,22 +171,23 @@ class ReturnBookView(APIView):
     def post(self, request):
         record_id = request.data.get('record_id')
         try:
-            record = BorrowRecord.objects.get(id=record_id, student=request.user.student_profile)
+            record = BorrowRecord.objects.get(id=record_id)
             
-            if record.is_returned:
-                return Response({"error": "Book already returned"}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Mark as returned
+            # update status, sana all inaupdate pota
+            record.status = 'Returned'
             record.is_returned = True
+            
+            # return date - timezone kung ano date sinauli tangina
+            record.return_date = timezone.now().date()
+            
             record.save()
 
-            # Increase Book Quantity
+            # increase stock kapag binabalik yung libro
             record.book.quantity += 1
             record.book.save()
-
-            return Response({"message": "Book returned successfully!"}, status=status.HTTP_200_OK)
-        except BorrowRecord.DoesNotExist:
-            return Response({"error": "Record not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"message": "Book returned!"})
+        except:
+            return Response({"error": "Error"}, status=400)
 
 class BookDetailView(generics.RetrieveAPIView):
     queryset = Book.objects.all()
@@ -108,8 +200,6 @@ class RelatedBooksView(generics.ListAPIView):
         category = self.request.query_params.get('category')
         book_id = self.request.query_params.get('book_id')
         return Book.objects.filter(category=category).exclude(id=book_id)[:4] # Limit to 4
-
-# --- LIBRARIAN VIEWS ---
 
 class MemberListView(generics.ListAPIView):
     queryset = Student.objects.all()
@@ -132,3 +222,13 @@ class StudentDetailView(generics.RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, instance):
         user = instance.user 
         user.delete()
+
+class BookCreateView(generics.ListCreateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [permissions.IsAuthenticated] # check admin user
+
+class BookUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [permissions.IsAuthenticated]

@@ -23,15 +23,23 @@ const BookDetails = () => {
         const data = await res.json();
         setBook(data);
 
-        const resRel = await fetch(`http://127.0.0.1:8000/api/books/related/?category=${data.category}&book_id=${data.id}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const dataRel = await resRel.json();
-        setRelatedBooks(dataRel);
+        if (data.category) {
+            const resRel = await fetch(`http://127.0.0.1:8000/api/books/related/?category=${data.category}&book_id=${data.id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const dataRel = await resRel.json();
+            setRelatedBooks(dataRel);
+        }
     };
 
     const handleBorrow = () => {
         navigate(`/student/borrow/${book.id}`);
+    };
+
+    const getImageUrl = (path) => {
+        if (!path) return null;
+        if (path.startsWith('http')) return path;
+        return `http://127.0.0.1:8000${path}`;
     };
 
     if (!book) return <div>Loading...</div>;
@@ -47,7 +55,10 @@ const BookDetails = () => {
                 <div className="details-layout">
                     <div className="details-image">
                         {book.cover_image ? (
-                            <img src={`http://127.0.0.1:8000${book.cover_image}`} alt={book.title} />
+                            <img 
+                                src={getImageUrl(book.cover_image)} 
+                                alt={book.title} 
+                            />
                         ) : (
                             <div className="no-cover-large">No Image</div>
                         )}
@@ -72,7 +83,10 @@ const BookDetails = () => {
                                 {relatedBooks.map(b => (
                                     <Link key={b.id} to={`/student/book/${b.id}`} className="mini-card">
                                         {b.cover_image ? (
-                                            <img src={`http://127.0.0.1:8000${b.cover_image}`} alt={b.title} />
+                                            <img 
+                                                src={getImageUrl(b.cover_image)} 
+                                                alt={b.title} 
+                                            />
                                         ) : <div className="no-cover-mini"></div>}
                                         <p>{b.title}</p>
                                         <span>{b.author}</span>

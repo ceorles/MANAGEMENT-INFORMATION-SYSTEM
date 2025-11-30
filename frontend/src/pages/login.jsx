@@ -23,7 +23,7 @@ const Login = ({ userType }) => {
             if (response.ok) {
                 localStorage.setItem('access_token', data.access);
                 localStorage.setItem('role', data.role);
-                // Save name for the dashboard
+                // save name for the dashboard
                 localStorage.setItem('user_name', data.name); 
                 
                 if (data.student_id) {

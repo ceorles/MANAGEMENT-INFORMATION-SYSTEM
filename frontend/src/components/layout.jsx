@@ -9,11 +9,10 @@ const Layout = ({ children }) => {
     const pageType = pathParts[1]; // 'login' or 'signup'
     const userRole = pathParts[2]; // 'student' or 'librarian'
 
-    // Define the Top Right Content
     let navContent = null;
 
     if (pageType === 'login' && userRole) {
-        // Login Page -> Show "Sign-Up" button
+        // Login - Sign-Up
         navContent = (
             <div style={{display: 'flex', alignItems: 'center'}}>
                 <span style={{ fontWeight: 'bold', marginRight: '15px', fontSize: '14px' }}>
@@ -25,7 +24,7 @@ const Layout = ({ children }) => {
             </div>
         );
     } else if (pageType === 'signup' && userRole) {
-        // Signup Page -> Show "Log In" button
+        // Signup - Log In
         navContent = (
             <div style={{display: 'flex', alignItems: 'center'}}>
                 <span style={{ fontWeight: 'bold', marginRight: '15px', fontSize: '14px' }}>

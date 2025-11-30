@@ -63,7 +63,7 @@ class MyTokenObtainPairSerializerStudent(TokenObtainPairSerializer):
 # Librarian
 class LibrarianSignupSerializer(serializers.ModelSerializer):
     name = serializers.CharField(write_only=True)
-    username = serializers.CharField(write_only=True) # Explicit username field
+    username = serializers.CharField(write_only=True) 
     email = serializers.EmailField(write_only=True)
     password = serializers.CharField(write_only=True, style={'input_type': 'password'})
     confirm_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
@@ -104,6 +104,13 @@ class LibrarianSignupSerializer(serializers.ModelSerializer):
 
         return librarian
 
+class LibrarianProfileSerializer(serializers.ModelSerializer):
+    profile_picture = serializers.ImageField(use_url=True, required=False)
+
+    class Meta:
+        model = Librarian
+        fields = ['profile_picture']
+
 class MyTokenObtainPairSerializerLibrarian(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
@@ -114,7 +121,7 @@ class MyTokenObtainPairSerializerLibrarian(TokenObtainPairSerializer):
         
         data['name'] = self.user.first_name 
 
-        # Student vs Librarian vs Admin
+        # student vs librarian vs admin
         if hasattr(self.user, 'student_profile'):
             data['role'] = 'student'
             data['student_id'] = self.user.student_profile.student_id
@@ -163,10 +170,13 @@ class StudentListSerializer(serializers.ModelSerializer):
 class BorrowRecordSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source='student.user.first_name', read_only=True)
     book_title = serializers.CharField(source='book.title', read_only=True)
-
+    book_id = serializers.IntegerField(source='book.id', read_only=True)
+    
     book_cover = serializers.ImageField(source='book.cover_image', read_only=True)
     book_synopsis = serializers.CharField(source='book.synopsis', read_only=True)
+    
+    book_category = serializers.CharField(source='book.category', read_only=True)
 
     class Meta:
         model = BorrowRecord
-        fields = ['id', 'student_name', 'book_title', 'borrow_date', 'is_returned']
+        fields = ['id', 'student_name', 'book_title', 'book_id', 'borrow_date', 'return_date', 'is_returned', 'book_cover', 'book_synopsis', 'status', 'book_category']

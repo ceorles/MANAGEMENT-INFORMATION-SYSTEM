@@ -15,10 +15,8 @@ import os
 import dj_database_url
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -37,9 +35,6 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = []
 
-
-# Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -48,9 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'library',
-    'corsheaders', # Corsheader - don't remove comment
-    'rest_framework', # Corsheader - don't remove comment
-    'rest_framework_simplejwt.token_blacklist', # Djangorestframework
+    'corsheaders', # Corsheader - don't fking remove comment
+    'rest_framework', # Corsheader - don't fking remove comment
+    'rest_framework_simplejwt.token_blacklist', # djangorestframework - don't fking remove comment
 ]
 
 MIDDLEWARE = [
@@ -61,7 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware', # Corsheader - don't remove comment
+    'corsheaders.middleware.CorsMiddleware', # Corsheader - don't fking remove comment
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -69,7 +64,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': ['templates'], # templates - don't fking remove comment
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

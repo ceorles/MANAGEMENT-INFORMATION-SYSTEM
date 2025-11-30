@@ -33,7 +33,7 @@ const StudentDashboard = () => {
                 setBooks(data);
             } else {
                 console.error("API Error:", data);
-                setBooks([]); // Must be empty
+                setBooks([]); 
             }
 
         } catch (error) {
@@ -88,13 +88,23 @@ const StudentDashboard = () => {
     );
 };
 
-// Reusable Card
+// HELPER FUNCTION TO FIX IMAGE URLS
+const getImageUrl = (path) => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    return `http://127.0.0.1:8000${path}`;
+};
+
+// UPDATED BOOK CARD
 const BookCard = ({ book }) => (
     <Link to={`/student/book/${book.id}`} className="book-card-link">
         <div className="book-card">
             <div className="book-cover">
                 {book.cover_image ? (
-                    <img src={`http://127.0.0.1:8000${book.cover_image}`} alt={book.title} />
+                    <img 
+                        src={getImageUrl(book.cover_image)} 
+                        alt={book.title} 
+                    />
                 ) : (
                     <div className="no-cover">No Image</div>
                 )}
