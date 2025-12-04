@@ -1,9 +1,46 @@
+<<<<<<< HEAD
 /* @tailwind base;
 @tailwind components;
 @tailwind utilities; */
 
 :root {
     --primary-brown: #8B6508;
+=======
+/* Floating animations for login background icons */
+@keyframes float1 {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(8deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+@keyframes float2 {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(15px) rotate(-6deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+@keyframes float3 {
+  0% { transform: translateX(0) rotate(0deg); }
+  50% { transform: translateX(18px) rotate(10deg); }
+  100% { transform: translateX(0) rotate(0deg); }
+}
+@keyframes float4 {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(-8deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+@keyframes float5 {
+  0% { transform: translateX(0) rotate(0deg); }
+  50% { transform: translateX(-15px) rotate(6deg); }
+  100% { transform: translateX(0) rotate(0deg); }
+}
+
+.animate-float1 { animation: float1 4s ease-in-out infinite; }
+.animate-float2 { animation: float2 5s ease-in-out infinite; }
+.animate-float3 { animation: float3 6s ease-in-out infinite; }
+.animate-float4 { animation: float4 4.5s ease-in-out infinite; }
+.animate-float5 { animation: float5 5.5s ease-in-out infinite; }
+.App {
+  text-align: center;
+>>>>>>> b9daade5e9291570267858c187b1b32302287f23
 }
 
 .auth-wrapper {
