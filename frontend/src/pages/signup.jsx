@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import booksImg from '../assets/books.png';
+import { useNavigate, Link } from 'react-router-dom';
+import { FaArrowLeft } from 'react-icons/fa';
+import '../styles/Login.css';
 
 const Signup = ({ userType }) => {
     const navigate = useNavigate();
@@ -47,69 +50,100 @@ const Signup = ({ userType }) => {
     };
 
     return (
-        <div className="signup-container">
-            <h3 style={{ textAlign: 'center', marginBottom: '20px' }}>
-                Register as {title}
-            </h3>
-            
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label>Full Name:</label>
-                    <input type="text" name="name" placeholder="Last name, First name" onChange={handleChange} required />
+        <div className="login-card-outer large">
+            <div className="login-card-image large">
+                <img src={booksImg} alt="Books" />
+            </div>
+            <div className="login-card-form large">
+                <div className="login-back-btn-row">
+                    <Link to={userType === 'student' ? '/login/student' : '/login/librarian'} className="login-back-btn" aria-label="Back">
+                        <FaArrowLeft size={18} />
+                        <span className="login-back-btn-text">Back</span>
+                    </Link>
                 </div>
-
-                <div className="form-group">
-                    <label>Email:</label>
-                    <input type="email" name="email" placeholder="email@address.com" onChange={handleChange} required />
-                </div>
-
-                {userType === 'librarian' && (
-                    <div className="form-group">
-                        <label>Username:</label>
-                        <input type="text" name="username" placeholder="Create a username" onChange={handleChange} required />
-                    </div>
-                )}
-
-                {userType === 'student' && (
-                    <>
-                        <div className="form-group">
-                            <label>Student ID:</label>
-                            <input type="text" name="student_id" placeholder="e.g. 2023-0001" onChange={handleChange} required />
+                <h2 className="login-main-title">Sign Up as {title}</h2>
+                <p className="login-subtitle">Create your account to get started.</p>
+                <form onSubmit={handleSubmit} className="login-form-modern">
+                    {userType === 'student' ? (
+                        <>
+                        <div className="form-row-2col">
+                            <div className="form-group">
+                                <label>Full Name:</label>
+                                <input type="text" name="name" placeholder="Last name, First name" onChange={handleChange} required />
+                            </div>
+                            <div className="form-group">
+                                <label>Email:</label>
+                                <input type="email" name="email" placeholder="email@address.com" onChange={handleChange} required />
+                            </div>
                         </div>
-                        <div className="form-group">
-                            <label>Contact Number:</label>
-                            <input type="text" name="contact_number" placeholder="+639..." onChange={handleChange} required />
+                        <div className="form-row-2col">
+                            <div className="form-group">
+                                <label>Student ID:</label>
+                                <input type="text" name="student_id" placeholder="e.g. 2023-0001" onChange={handleChange} required />
+                            </div>
+                            <div className="form-group">
+                                <label>Contact Number:</label>
+                                <input type="text" name="contact_number" placeholder="+639..." onChange={handleChange} required />
+                            </div>
                         </div>
-                        <div className="form-group">
-                            <label>Sex:</label>
-                            <select 
-                                name="sex" 
-                                onChange={handleChange}
-                                style={{
-                                    width: '100%', padding: '12px', border: '2px solid #8B6508', 
-                                    borderRadius: '25px', outline: 'none'
-                                }}
-                            >
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                            </select>
+                        <div className="form-row-2col">
+                            <div className="form-group">
+                                <label>Sex:</label>
+                                <select name="sex" onChange={handleChange} style={{width: '100%', padding: '12px', border: '2px solid #8B6508', borderRadius: '25px', outline: 'none'}}>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Password:</label>
+                                <input type="password" name="password" placeholder="Min 8 characters" onChange={handleChange} required />
+                            </div>
                         </div>
-                    </>
-                )}
-
-                <div className="form-group">
-                    <label>Password:</label>
-                    <input type="password" name="password" placeholder="Min 8 characters" onChange={handleChange} required />
+                        <div className="form-row-2col" style={{justifyContent: 'center'}}>
+                            <div className="form-group" style={{maxWidth: '320px', flex: '1 1 320px'}}>
+                                <label>Confirm Password:</label>
+                                <input type="password" name="confirm_password" placeholder="Verify Password" onChange={handleChange} required />
+                            </div>
+                        </div>
+                        <button type="submit" className="login-btn-modern">Sign Up</button>
+                        </>
+                    ) : (
+                        <>
+                        <div className="form-row-2col">
+                            <div className="form-group">
+                                <label>Full Name:</label>
+                                <input type="text" name="name" placeholder="Last name, First name" onChange={handleChange} required />
+                            </div>
+                            <div className="form-group">
+                                <label>Email:</label>
+                                <input type="email" name="email" placeholder="email@address.com" onChange={handleChange} required />
+                            </div>
+                        </div>
+                        <div className="form-row-2col">
+                            <div className="form-group">
+                                <label>Username:</label>
+                                <input type="text" name="username" placeholder="Create a username" onChange={handleChange} required />
+                            </div>
+                            <div className="form-group">
+                                <label>Password:</label>
+                                <input type="password" name="password" placeholder="Min 8 characters" onChange={handleChange} required />
+                            </div>
+                        </div>
+                        <div className="form-row-2col" style={{justifyContent: 'center'}}>
+                            <div className="form-group" style={{maxWidth: '320px', flex: '1 1 320px'}}>
+                                <label>Confirm Password:</label>
+                                <input type="password" name="confirm_password" placeholder="Verify Password" onChange={handleChange} required />
+                            </div>
+                        </div>
+                        <button type="submit" className="login-btn-modern">Sign Up</button>
+                        </>
+                    )}
+                </form>
+                <div className="signup-link-container-modern">
+                    <span>Already have an account?</span>
+                    <Link to={userType === 'student' ? '/login/student' : '/login/librarian'} className="signup-link-modern">Login</Link>
                 </div>
-
-                <div className="form-group">
-                    <label>Confirm Password:</label>
-                    <input type="password" name="confirm_password" placeholder="Verify Password" onChange={handleChange} required />
-                </div>
-
-                <button type="submit" className="submit-btn">Sign-Up</button>
-
-            </form>
+            </div>
         </div>
     );
 };

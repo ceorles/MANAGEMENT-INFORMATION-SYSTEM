@@ -23,8 +23,20 @@ const Members = () => {
         password: '' 
     });
 
+    const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
+
     useEffect(() => {
         fetchMembers();
+    }, []);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (typeof window === 'undefined') return;
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     const fetchMembers = async () => {
@@ -34,9 +46,19 @@ const Members = () => {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
-            setMembers(data);
+
+            if (Array.isArray(data)) {
+                setMembers(data);
+            } else if (Array.isArray(data.results)) {
+                setMembers(data.results);
+            } else if (data) {
+                setMembers([data]);
+            } else {
+                setMembers([]);
+            }
         } catch (error) {
             console.error("Error fetching members:", error);
+            setMembers([]);
         }
     };
 
@@ -143,62 +165,110 @@ const Members = () => {
         doc.save("Libyte_Members.pdf");
     };
 
-    const filteredMembers = members.filter(member => 
+    const safeMembers = Array.isArray(members) ? members : [];
+
+    const filteredMembers = safeMembers.filter(member => 
         member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.student_id.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
-        <div className="dashboard-container">
+        <div className="dashboard-container" style={{background: 'linear-gradient(135deg, #fffbe6 0%, #f7e9c4 100%)', minHeight: '100vh'}}>
             <LibrarianSidebar />
-            
-            <div className="main-content">
-                <div className="card">
-                    <div className="card-header">
-                        <h2 style={{margin:0}}>Members</h2>
+
+            <div className="main-content" style={{marginLeft: isMobile ? 0 : '260px', padding: '24px 16px', minHeight: '100vh'}}>
+                <div style={{background: 'rgba(255,255,255,0.95)', borderRadius: 18, boxShadow: '0 8px 24px rgba(139,101,8,0.12)', padding: 20, maxWidth: '1100px', marginLeft: isMobile ? 0 : '40px'}}>
+                    <div style={{display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18}}>
+                        <h2 style={{margin: 0, color: '#8B6508', fontWeight: 700, fontSize: 24, letterSpacing: 1}}>Members</h2>
                         <input 
                             type="text" 
-                            placeholder="Search..." 
+                            placeholder="Search members..." 
                             className="search-bar"
+                            style={{
+                                padding: '8px 12px',
+                                borderRadius: 12,
+                                border: '1px solid #e0d4b8',
+                                minWidth: 200,
+                                maxWidth: 260,
+                                flex: '0 0 auto',
+                                boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
+                            }}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
 
-                    <div id="printable-table">
-                        <table>
+                    <div id="printable-table" style={{overflowX: 'auto'}}>
+                        <table style={{width: '100%', borderCollapse: 'collapse', minWidth: 600}}>
                             <thead>
                                 <tr>
-                                    <th>Id</th>
-                                    <th>Name</th>
-                                    <th>Sex</th>
-                                    <th>Contact No.</th>
-                                    <th>Actions</th>
+                                    <th style={{textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #f0e2bf', color: '#8B6508', fontSize: 17}}>ID</th>
+                                    <th style={{textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #f0e2bf', color: '#8B6508', fontSize: 17}}>Name</th>
+                                    <th style={{textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #f0e2bf', color: '#8B6508', fontSize: 17}}>Sex</th>
+                                    <th style={{textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #f0e2bf', color: '#8B6508', fontSize: 17}}>Contact No.</th>
+                                    <th style={{textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #f0e2bf', color: '#8B6508', fontSize: 17}}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredMembers.map((member) => (
-                                    <tr key={member.student_id}>
-                                        <td>{member.student_id}</td>
-                                        <td>{member.name}</td>
-                                        <td>{member.sex}</td>
-                                        <td>{member.contact_number}</td>
-                                        <td>
-                                            <button className="action-btn edit-btn" onClick={() => openEditModal(member)}>
+                                {filteredMembers.map((member, index) => (
+                                    <tr key={member.student_id || index} style={{background: index % 2 === 0 ? '#fff' : '#fffaf0'}}>
+                                        <td style={{padding: '10px 8px', borderBottom: '1px solid #f3e6c7', color: '#555'}}>{member.student_id}</td>
+                                        <td style={{padding: '10px 8px', borderBottom: '1px solid #f3e6c7', color: '#333', fontWeight: 500}}>{member.name}</td>
+                                        <td style={{padding: '10px 8px', borderBottom: '1px solid #f3e6c7', color: '#555'}}>{member.sex}</td>
+                                        <td style={{padding: '10px 8px', borderBottom: '1px solid #f3e6c7', color: '#555'}}>{member.contact_number}</td>
+                                        <td style={{padding: '10px 8px', borderBottom: '1px solid #f3e6c7'}}>
+                                            <button className="action-btn edit-btn" onClick={() => openEditModal(member)} style={{
+                                                border: 'none',
+                                                background: 'rgba(212,175,55,0.12)',
+                                                color: '#8B6508',
+                                                padding: '6px 8px',
+                                                borderRadius: 10,
+                                                marginRight: 6,
+                                                cursor: 'pointer'
+                                            }}>
                                                 <FaEdit />
                                             </button>
-                                            <button className="action-btn delete-btn" onClick={() => openDeleteModal(member)}>
+                                            <button className="action-btn delete-btn" onClick={() => openDeleteModal(member)} style={{
+                                                border: 'none',
+                                                background: 'rgba(220,53,69,0.09)',
+                                                color: '#b02a37',
+                                                padding: '6px 8px',
+                                                borderRadius: 10,
+                                                cursor: 'pointer'
+                                            }}>
                                                 <FaTrash />
                                             </button>
                                         </td>
                                     </tr>
                                 ))}
+                                {filteredMembers.length === 0 && (
+                                    <tr>
+                                        <td colSpan="5" style={{padding: 16, textAlign: 'center', color: '#999'}}>No members found.</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
 
-                    <div className="card-footer">
-                        <button className="footer-btn print-btn" onClick={handlePrint}><FaPrint /> Print</button>
-                        <button className="footer-btn download-btn" onClick={handleDownloadPDF}><FaDownload /> Download</button>
+                    <div className="card-footer" style={{display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16}}>
+                        <button className="footer-btn print-btn" onClick={handlePrint} style={{
+                            background: 'linear-gradient(135deg, #fffbe6 0%, #f7e9c4 100%)',
+                            borderRadius: 14,
+                            padding: '8px 16px',
+                            border: '1px solid #e0d4b8',
+                            color: '#8B6508',
+                            fontWeight: 600,
+                            cursor: 'pointer'
+                        }}><FaPrint />&nbsp;Print</button>
+                        <button className="footer-btn download-btn" onClick={handleDownloadPDF} style={{
+                            background: 'linear-gradient(135deg, #d4af37 0%, #8B6508 100%)',
+                            borderRadius: 14,
+                            padding: '8px 16px',
+                            border: 'none',
+                            color: '#fff',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 8px rgba(139,101,8,0.25)'
+                        }}><FaDownload />&nbsp;Download</button>
                     </div>
                 </div>
             </div>

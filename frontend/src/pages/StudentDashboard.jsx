@@ -45,9 +45,9 @@ const StudentDashboard = () => {
     const filteredBooks = books.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
     return (
-        <div>
+        <div className="dashboard-bg">
+            <div className="grid"></div>
             <StudentNavbar />
-            
             <div className="student-container">
                 {/* Search Bar */}
                 <div className="search-wrapper">

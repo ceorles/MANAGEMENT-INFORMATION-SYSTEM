@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import StudentNavbar from '../components/StudentNavbar';
 import { FaChevronLeft } from 'react-icons/fa';
-import '../styles/Student.css';
+import '../styles/BookDetails.css';
 
 const BookDetails = () => {
     const { id } = useParams();
@@ -53,46 +53,51 @@ const BookDetails = () => {
                 </button>
 
                 <div className="details-layout">
-                    <div className="details-image">
-                        {book.cover_image ? (
-                            <img 
-                                src={getImageUrl(book.cover_image)} 
-                                alt={book.title} 
-                            />
-                        ) : (
-                            <div className="no-cover-large">No Image</div>
-                        )}
+                    <div className="details-card-glass">
+                        <div className="details-image">
+                            {book.cover_image ? (
+                                <img 
+                                    src={getImageUrl(book.cover_image)} 
+                                    alt={book.title} 
+                                />
+                            ) : (
+                                <div className="no-cover-large">No Image</div>
+                            )}
+                        </div>
+
+                        <div className="details-info">
+                            <h1 className="details-title">{book.title}</h1>
+                            <h3 className="details-author">by {book.author}</h3>
+                            <div className="details-meta">
+                                <span className="details-category">{book.category}</span>
+                                <span className="details-quantity">{book.quantity > 0 ? `${book.quantity} available` : 'Out of Stock'}</span>
+                            </div>
+                            <p className="synopsis">
+                                {book.synopsis || "No synopsis available for this book."}
+                            </p>
+
+                            <button className="borrow-btn-large" onClick={handleBorrow} disabled={book.quantity <= 0}>
+                                {book.quantity > 0 ? 'Borrow' : 'Out of Stock'}
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="details-info">
-                        <h1>{book.title}</h1>
-                        <h3 style={{color: '#555'}}>by {book.author}</h3>
-                        
-                        <p className="synopsis">
-                            {book.synopsis || "No synopsis available for this book."}
-                        </p>
-
-                        <button className="borrow-btn-large" onClick={handleBorrow} disabled={book.quantity <= 0}>
-                            {book.quantity > 0 ? 'Borrow' : 'Out of Stock'}
-                        </button>
-
-                        <div className="more-like-this">
-                            <hr />
-                            <h3>More like this</h3>
-                            <div className="mini-grid">
-                                {relatedBooks.map(b => (
-                                    <Link key={b.id} to={`/student/book/${b.id}`} className="mini-card">
-                                        {b.cover_image ? (
-                                            <img 
-                                                src={getImageUrl(b.cover_image)} 
-                                                alt={b.title} 
-                                            />
-                                        ) : <div className="no-cover-mini"></div>}
-                                        <p>{b.title}</p>
-                                        <span>{b.author}</span>
-                                    </Link>
-                                ))}
-                            </div>
+                    <div className="more-like-this modern-more-like">
+                        <hr />
+                        <h3>More like this</h3>
+                        <div className="mini-grid modern-mini-grid">
+                            {relatedBooks.map(b => (
+                                <Link key={b.id} to={`/student/book/${b.id}`} className="mini-card modern-mini-card">
+                                    {b.cover_image ? (
+                                        <img 
+                                            src={getImageUrl(b.cover_image)} 
+                                            alt={b.title} 
+                                        />
+                                    ) : <div className="no-cover-mini"></div>}
+                                    <p>{b.title}</p>
+                                    <span>{b.author}</span>
+                                </Link>
+                            ))}
                         </div>
                     </div>
                 </div>

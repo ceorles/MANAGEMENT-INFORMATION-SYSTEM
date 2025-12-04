@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import booksImg from '../assets/books.png';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
+import '../styles/Login.css';
 
 const Login = ({ userType }) => {
     const [formData, setFormData] = useState({ username: '', password: '' });
@@ -50,34 +52,29 @@ const Login = ({ userType }) => {
     };
 
     return (
-        <div className="split-screen">
-            <div className="split-left">
-                
-                <Link to="/" style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    color: '#8B6508',
-                    textDecoration: 'none',
-                    fontWeight: 'bold',
-                    marginBottom: '30px',
-                    width: 'fit-content',
-                    fontSize: '16px'
-                }}>
-                    <FaArrowLeft /> Back
-                </Link>
-                {/* --------------------------- */}
-
-                <h2>{title} Log-In</h2>
-                
-                <form onSubmit={handleSubmit}>
+        <div className="login-card-outer large">
+            <div className="login-card-image large">
+                <img src={booksImg} alt="Books" />
+            </div>
+            <div className="login-card-form large">
+                <div className="login-back-btn-row">
+                    <Link to="/" className="login-back-btn" aria-label="Back">
+                        <FaArrowLeft size={18} />
+                        <span className="login-back-btn-text">Back</span>
+                    </Link>
+                </div>
+                <h2 className="login-main-title">Log In as {title}</h2>
+                <p className="login-subtitle">Enter your credentials to access your account.</p>
+                <form onSubmit={handleSubmit} className="login-form-modern">
                     <div className="form-group">
                         <label>Username or Email:</label>
                         <input 
                             type="text" 
                             name="username"
-                            placeholder="Enter your Username or Email Address" 
+                            placeholder="Username or Email"
                             onChange={(e) => setFormData({...formData, username: e.target.value})}
+                            autoComplete="username"
+                            required
                         />
                     </div>
                     <div className="form-group">
@@ -85,15 +82,23 @@ const Login = ({ userType }) => {
                         <input 
                             type="password" 
                             name="password"
-                            placeholder="Enter your Password" 
+                            placeholder="Password"
                             onChange={(e) => setFormData({...formData, password: e.target.value})}
+                            autoComplete="current-password"
+                            required
                         />
                     </div>
-                    <button type="submit" className="submit-btn">Log - In</button>
+                    <button type="submit" className="login-btn-modern">Log In</button>
                 </form>
-            </div>
-            <div className="split-right">
-                <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=600&q=80" alt="Books" />
+                <div className="signup-link-container-modern">
+                    <span>Don't have Account? </span>
+                    {userType === 'student' && (
+                        <Link to="/signup/student" className="signup-link-modern">Signup</Link>
+                    )}
+                    {userType === 'librarian' && (
+                        <Link to="/signup/librarian" className="signup-link-modern">Signup</Link>
+                    )}
+                </div>
             </div>
         </div>
     );

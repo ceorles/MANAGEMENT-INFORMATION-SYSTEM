@@ -1,0 +1,102 @@
+/* Modern, professional, responsive landing page styles */
+.landing-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fffbe6 0%, #fff 100%);
+  position: relative;
+  padding: 2vw;
+}
+.landing-bg {
+  background-repeat: no-repeat;
+  background-position: right bottom;
+  background-size: 40vw;
+}
+.landing-card {
+  background: rgba(255,255,255,0.95);
+  border-radius: 2rem;
+  box-shadow: 0 8px 32px rgba(139,101,8,0.15), 0 1.5px 8px rgba(0,0,0,0.08);
+  border: 2px solid #8B6508;
+  padding: 2.5rem 2rem;
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  backdrop-filter: blur(4px);
+}
+.landing-logo-img {
+  width: 96px;
+  height: 96px;
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 2px 8px #8B6508);
+}
+.landing-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #222;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  letter-spacing: 1px;
+}
+.landing-title-accent {
+  color: #8B6508;
+}
+.landing-subtitle {
+  font-size: 1.2rem;
+  color: #333;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-weight: 600;
+}
+.landing-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  width: 100%;
+  align-items: center;
+}
+@media (min-width: 600px) {
+  .landing-buttons {
+    flex-direction: row;
+    gap: 2rem;
+  }
+}
+.landing-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 1rem 2.5rem;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 12px rgba(139,101,8,0.10);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  text-decoration: none;
+  width: 100%;
+  max-width: 180px;
+}
+.student-btn {
+  background: #8B6508;
+  color: #fff;
+}
+.student-btn:hover {
+  background: #a67c2d;
+  transform: translateY(-2px) scale(1.04);
+}
+.librarian-btn {
+  background: #a67c2d;
+  color: #fff;
+}
+.librarian-btn:hover {
+  background: #8B6508;
+  transform: translateY(-2px) scale(1.04);
+}
+.landing-btn-icon {
+  margin-right: 0.7rem;
+  display: flex;
+  align-items: center;
+}
