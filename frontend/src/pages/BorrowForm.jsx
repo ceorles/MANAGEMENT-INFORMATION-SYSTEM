@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import StudentNavbar from '../components/StudentNavbar';
 import { FaChevronLeft, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa'; 
+import { jwtDecode } from "jwt-decode";
 import '../styles/Student.css';
+import LoadingScreen from '../components/LoadingScreen';
 
 const BorrowForm = () => {
     const { id } = useParams();
@@ -21,11 +23,22 @@ const BorrowForm = () => {
     });
 
     useEffect(() => {
-        const storedName = localStorage.getItem('user_name');
-        const storedId = localStorage.getItem('student_id');
+        const token = sessionStorage.getItem('access_token');
+        let decodedName = '';
+        let decodedId = '';
+
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                decodedName = decoded.name;
+                decodedId = decoded.student_id;
+            } catch (error) {
+                console.error("Token error:", error);
+            }
+        }
+        // --------------------------------------
 
         const fetchBook = async () => {
-            const token = localStorage.getItem('access_token');
             const response = await fetch(`http://127.0.0.1:8000/api/books/${id}/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -33,19 +46,19 @@ const BorrowForm = () => {
             setBook(data);
             
             setFormData({
-                name: storedName || '',
-                student_id: storedId || '',
+                name: decodedName || '', 
+                student_id: decodedId || '',
                 book_title: data.title,
                 date: new Date().toISOString().split('T')[0]
             });
         };
 
-        fetchBook();
+        if (token) fetchBook();
     }, [id]);
 
     const handleConfirmBorrow = async (e) => {
         e.preventDefault();
-        const token = localStorage.getItem('access_token');
+        const token = sessionStorage.getItem('access_token');
         
         try {
             const response = await fetch('http://127.0.0.1:8000/api/borrow/', {
@@ -74,7 +87,7 @@ const BorrowForm = () => {
 
     const handleCloseSuccess = () => {
         setShowSuccessModal(false);
-        navigate('/student-dashboard');
+        navigate('/student/return');
     } 
 
     const handleCloseError = () => {
@@ -87,10 +100,10 @@ const BorrowForm = () => {
         return `http://127.0.0.1:8000${path}`;
     };
 
-    if (!book) return <div>Loading...</div>;
+    if (!book) return <LoadingScreen />;
 
     return (
-        <div>
+        <div className="dashboard-bg">
             <StudentNavbar />
             <div className="student-container" style={{maxWidth: 900, margin: '0 auto', padding: '32px 8px', width: '100%'}}>
                 <button className="back-btn" onClick={() => navigate(-1)} style={{marginBottom: 24, marginTop: 18, borderRadius: 18, boxShadow: '0 2px 8px rgba(139,101,8,0.08)', background: 'none', color: '#8B6508', fontWeight: 600, fontSize: '1rem', padding: '10px 22px'}}>
@@ -98,7 +111,6 @@ const BorrowForm = () => {
                 </button>
 
                 <div className="details-layout" style={{background: 'rgba(255,255,255,0.85)', borderRadius: 32, boxShadow: '0 8px 32px rgba(139,101,8,0.12), 0 1.5px 8px 0 rgba(255,215,0,0.08)', padding: '40px 48px', marginBottom: 32, backdropFilter: 'blur(8px)', width: '100%', display: 'flex', flexDirection: window.innerWidth <= 600 ? 'column' : 'row', gap: window.innerWidth <= 600 ? 12 : 40, alignItems: 'flex-start'}}>
-                    {/* LEFT - Book Image */}
                     <div className="details-image" style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: window.innerWidth <= 600 ? '100%' : 'auto', minWidth: window.innerWidth <= 600 ? '0' : '220px', maxWidth: window.innerWidth <= 600 ? '100%' : '220px'}}>
                         {book.cover_image ? (
                             <img 
@@ -112,8 +124,6 @@ const BorrowForm = () => {
                         <h2 style={{marginTop: 18, fontSize: '2.2rem', fontWeight: 700, color: '#8B6508', textAlign: 'center', letterSpacing: 1}}>{book.title}</h2>
                         <p style={{fontSize: '1.2rem', color: '#555', marginTop: 4, marginBottom: 0, textAlign: 'center'}}><b>by {book.author}</b></p>
                     </div>
-
-                    {/* RIGHT - Form */}
                     <div className="details-info" style={{flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingLeft: 0, width: '100%', minWidth: 0}}>
                         <div className="form-header" style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: 18, paddingBottom: 8, position: 'relative'}}>
                             <span className="form-accent" style={{width: 48, height: 6, borderRadius: 6, background: 'linear-gradient(90deg, #8B6508 0%, #FFD700 100%)', marginBottom: 8}}></span>
@@ -145,7 +155,6 @@ const BorrowForm = () => {
                 </div>
             </div>
 
-            {/* --- SUCCESS POP-OUT BOX --- */}
             {showSuccessModal && (
                 <div className="modal-overlay">
                     <div className="modal-box" style={{background: '#fff', borderRadius: 18, boxShadow: '0 8px 32px rgba(139,101,8,0.18)', padding: '32px 28px', minWidth: 320, maxWidth: '90vw', textAlign: 'center'}}>
@@ -161,7 +170,6 @@ const BorrowForm = () => {
                 </div>
             )}
 
-            {/* --- ERROR POP-OUT BOX --- */}
             {showErrorModal && (
                 <div className="modal-overlay">
                     <div className="modal-box" style={{background: '#fff', borderRadius: 18, boxShadow: '0 8px 32px rgba(139,101,8,0.18)', padding: '32px 28px', minWidth: 320, maxWidth: '90vw', textAlign: 'center'}}>

@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
 import booksImg from '../assets/books.png';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaArrowLeft } from 'react-icons/fa';
+import { FaArrowLeft, FaExclamationCircle } from 'react-icons/fa'; 
 import '../styles/Login.css';
+import { jwtDecode } from "jwt-decode";
+import LoadingScreen from '../components/LoadingScreen';
 
 const Login = ({ userType }) => {
     const [formData, setFormData] = useState({ username: '', password: '' });
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false); // loading
+
+    // pop out box
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     const title = userType ? userType.charAt(0).toUpperCase() + userType.slice(1) : "User";
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsLoading(true); // loading
 
         try {
             const response = await fetch('http://127.0.0.1:8000/api/login/', {
@@ -23,33 +31,43 @@ const Login = ({ userType }) => {
             const data = await response.json();
 
             if (response.ok) {
-                localStorage.setItem('access_token', data.access);
-                localStorage.setItem('role', data.role);
-                // save name for the dashboard
-                localStorage.setItem('user_name', data.name); 
+                sessionStorage.setItem('access_token', data.access);
+                sessionStorage.setItem('refresh_token', data.refresh);
                 
-                if (data.student_id) {
-                    localStorage.setItem('student_id', data.student_id);
-                }
+                const decoded = jwtDecode(data.access);
+                const role = decoded.role;
 
-                if (userType && data.role !== userType) {
-                   alert(`Error: You are a ${data.role}, but you tried to log in as a ${userType}.`);
+                if (userType && role !== userType) {
+                   setIsLoading(false); // stop loading to show error
+                   setErrorMessage(`Error: This account is a ${role}, but you are trying to log in as a ${userType}.`);
+                   setShowErrorModal(true);
+                   sessionStorage.clear();
                    return;
                 }
 
-                if (data.role === 'student') {
-                    navigate('/student-dashboard');
-                } else if (data.role === 'librarian') {
-                    navigate('/librarian-dashboard');
-                }
+                // animation
+                setTimeout(() => {
+                    if (role === 'student') {
+                        navigate('/student-dashboard');
+                    } else if (role === 'librarian') {
+                        navigate('/librarian-dashboard');
+                    } 
+                }, 1500);
+
             } else {
-                alert("Login Failed: " + (data.detail || "Invalid credentials"));
+                setIsLoading(false);
+                setErrorMessage(data.detail || "Invalid credentials");
+                setShowErrorModal(true);
             }
         } catch (error) {
+            setIsLoading(false);
             console.error("Error:", error);
-            alert("Could not connect to the server.");
+            setErrorMessage("Could not connect to the server.");
+            setShowErrorModal(true);
         }
     };
+
+    if (isLoading) return <LoadingScreen />;
 
     return (
         <div className="login-card-outer large">
@@ -65,6 +83,7 @@ const Login = ({ userType }) => {
                 </div>
                 <h2 className="login-main-title">Log In as {title}</h2>
                 <p className="login-subtitle">Enter your credentials to access your account.</p>
+                
                 <form onSubmit={handleSubmit} className="login-form-modern">
                     <div className="form-group">
                         <label>Username or Email:</label>
@@ -90,6 +109,7 @@ const Login = ({ userType }) => {
                     </div>
                     <button type="submit" className="login-btn-modern">Log In</button>
                 </form>
+
                 <div className="signup-link-container-modern">
                     <span>Don't have Account? </span>
                     {userType === 'student' && (
@@ -100,6 +120,23 @@ const Login = ({ userType }) => {
                     )}
                 </div>
             </div>
+
+            {showErrorModal && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <FaExclamationCircle size={50} color="#cc0000" style={{marginBottom: '10px'}} />
+                        <h3 className="modal-header" style={{color: '#cc0000'}}>Login Error</h3>
+                        <p className="modal-text">{errorMessage}</p>
+                        <button 
+                            className="btn-modal-ok" 
+                            onClick={() => setShowErrorModal(false)}
+                            style={{backgroundColor: '#cc0000'}}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

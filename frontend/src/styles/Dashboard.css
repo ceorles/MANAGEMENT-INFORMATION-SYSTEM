@@ -1,7 +1,7 @@
 .dashboard-container {
     display: flex;
     min-height: 100vh;
-    background-color: #fff;
+    background-color: #ffffff;
     font-family: 'Segoe UI', sans-serif;
 }
 
@@ -330,3 +330,4 @@ tr:nth-child(even) { background-color: #f9f9f9; }
     color: #555;
     font-size: 14px;
 }
+

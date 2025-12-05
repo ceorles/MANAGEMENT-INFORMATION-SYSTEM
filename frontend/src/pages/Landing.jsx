@@ -1,41 +1,55 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import '../styles/Landing.css';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png'; 
+import LoadingScreen from '../components/LoadingScreen';
 
 const Landing = () => {
+    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleNavigation = (path) => {
+        setIsLoading(true);
+        setTimeout(() => {
+            navigate(path);
+        }, 1500); 
+    };
+
+    if (isLoading) return <LoadingScreen />;
+
     return (
         <div className="landing-container">
             <div className="landing-content">
-                <div className="landing-logo">
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#8B6508" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                    </svg>
-                    <h1 style={{fontSize: '48px', color: '#333', marginLeft: '10px'}}>
+                
+                <div className="landing-logo" style={{ 
+                    display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                    gap: '30px', marginBottom: '30px'
+                }}>
+                    <img src={logo} alt="Libyte Logo" style={{ width: '150px', height: 'auto', objectFit: 'contain', marginRight: '-30px' }} />
+                    <h1 style={{fontSize: '64px', color: '#333', margin: 0, fontWeight: '800', lineHeight: '1'}}>
                         LIB<span style={{color: '#8B6508'}}>YTE</span>
                     </h1>
-                </div>
+                </div>  
 
-                <h2 style={{color: '#000', marginBottom: '30px'}}>
+                <h2 style={{color: '#000', marginBottom: '40px', fontSize: '24px', fontWeight: '600'}}>
                     Access Your Library.<br/>Please log in as:
                 </h2>
 
                 <div className="role-buttons">
-                    <Link to="/login/student" className="role-btn">
+                    <button onClick={() => handleNavigation('/login/student')} className="role-btn" style={{cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '10px'}}>
                             <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
                             <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
                         </svg>
                         Student
-                    </Link>
+                    </button>
 
-                    <Link to="/login/librarian" className="role-btn">
+                    <button onClick={() => handleNavigation('/login/librarian')} className="role-btn" style={{cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '10px'}}>
                             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
                             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
                         </svg>
                         Librarian
-                    </Link>
+                    </button>
                 </div>
             </div>
         </div>

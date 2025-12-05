@@ -22,7 +22,8 @@ const StudentDashboard = () => {
     }, []);
 
     const fetchBooks = async () => {
-        const token = localStorage.getItem('access_token');
+        const token = sessionStorage.getItem('access_token');
+        
         try {
             const response = await fetch('http://127.0.0.1:8000/api/books/', {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -49,7 +50,6 @@ const StudentDashboard = () => {
             <div className="grid"></div>
             <StudentNavbar />
             <div className="student-container">
-                {/* Search Bar */}
                 <div className="search-wrapper">
                     <FaSearch className="search-icon"/>
                     <input 
@@ -88,14 +88,13 @@ const StudentDashboard = () => {
     );
 };
 
-// HELPER FUNCTION TO FIX IMAGE URLS
+// function to fix image urls
 const getImageUrl = (path) => {
     if (!path) return null;
     if (path.startsWith('http')) return path;
     return `http://127.0.0.1:8000${path}`;
 };
 
-// UPDATED BOOK CARD
 const BookCard = ({ book }) => (
     <Link to={`/student/book/${book.id}`} className="book-card-link">
         <div className="book-card">

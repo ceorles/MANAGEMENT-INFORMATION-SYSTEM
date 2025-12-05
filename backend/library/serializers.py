@@ -3,8 +3,7 @@ from django.contrib.auth.models import User
 from .models import Student, Librarian, Book, BorrowRecord
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-
-# Authentication
+# --- AUTHENTICATION ---
 class StudentSignupSerializer(serializers.ModelSerializer):
     name = serializers.CharField(write_only=True)
     email = serializers.EmailField(write_only=True)
@@ -18,10 +17,8 @@ class StudentSignupSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data['password'] != data['confirm_password']:
             raise serializers.ValidationError({"password": "Passwords do not match."})
-
         if User.objects.filter(email=data['email']).exists():
             raise serializers.ValidationError({"email": "This email is already registered."})
-
         return data
 
     def create(self, validated_data):
@@ -36,31 +33,9 @@ class StudentSignupSerializer(serializers.ModelSerializer):
             password=password,
             first_name=name 
         )
-
-        student = Student.objects.create(
-            user=user,
-            **validated_data 
-        )
-
+        student = Student.objects.create(user=user, **validated_data)
         return student
 
-class MyTokenObtainPairSerializerStudent(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-
-        data['username'] = self.user.username
-        data['email'] = self.user.email
-        data['is_superuser'] = self.user.is_superuser
-
-        try:
-            data['student_id'] = self.user.student_profile.student_id
-            data['role'] = 'student'
-        except:
-            data['role'] = 'admin' if self.user.is_superuser else 'user'
-
-        return data
-
-# Librarian
 class LibrarianSignupSerializer(serializers.ModelSerializer):
     name = serializers.CharField(write_only=True)
     username = serializers.CharField(write_only=True) 
@@ -75,13 +50,10 @@ class LibrarianSignupSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data['password'] != data['confirm_password']:
             raise serializers.ValidationError({"password": "Passwords do not match."})
-
         if User.objects.filter(email=data['email']).exists():
             raise serializers.ValidationError({"email": "This email is already registered."})
-            
         if User.objects.filter(username=data['username']).exists():
             raise serializers.ValidationError({"username": "This username is already taken."})
-
         return data
 
     def create(self, validated_data):
@@ -97,12 +69,26 @@ class LibrarianSignupSerializer(serializers.ModelSerializer):
             password=password,
             first_name=name 
         )
-
-        librarian = Librarian.objects.create(
-            user=user
-        )
-
+        librarian = Librarian.objects.create(user=user)
         return librarian
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        token['name'] = user.first_name
+        token['username'] = user.username
+
+        if hasattr(user, 'student_profile'):
+            token['role'] = 'student'
+            token['student_id'] = user.student_profile.student_id
+        elif hasattr(user, 'librarian_profile'):
+            token['role'] = 'librarian'
+        else:
+            token['role'] = 'admin'
+
+        return token
 
 class LibrarianProfileSerializer(serializers.ModelSerializer):
     profile_picture = serializers.ImageField(use_url=True, required=False)
@@ -111,28 +97,6 @@ class LibrarianProfileSerializer(serializers.ModelSerializer):
         model = Librarian
         fields = ['profile_picture']
 
-class MyTokenObtainPairSerializerLibrarian(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-
-        data['username'] = self.user.username
-        data['email'] = self.user.email
-        data['is_superuser'] = self.user.is_superuser
-        
-        data['name'] = self.user.first_name 
-
-        # student vs librarian vs admin
-        if hasattr(self.user, 'student_profile'):
-            data['role'] = 'student'
-            data['student_id'] = self.user.student_profile.student_id
-        elif hasattr(self.user, 'librarian_profile'):
-            data['role'] = 'librarian'
-        else:
-            data['role'] = 'admin' if self.user.is_superuser else 'user'
-
-        return data
-    
-# Dashboard
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
@@ -141,7 +105,6 @@ class BookSerializer(serializers.ModelSerializer):
 class StudentListSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='user.first_name')
     email = serializers.CharField(source='user.email', read_only=True) 
-    
     password = serializers.CharField(write_only=True, required=False) 
 
     class Meta:
@@ -150,7 +113,6 @@ class StudentListSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', {})
-        
         if 'first_name' in user_data:
             instance.user.first_name = user_data['first_name']
         
@@ -164,17 +126,14 @@ class StudentListSerializer(serializers.ModelSerializer):
         instance.contact_number = validated_data.get('contact_number', instance.contact_number)
         instance.sex = validated_data.get('sex', instance.sex)
         instance.save()
-        
         return instance
 
 class BorrowRecordSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source='student.user.first_name', read_only=True)
     book_title = serializers.CharField(source='book.title', read_only=True)
     book_id = serializers.IntegerField(source='book.id', read_only=True)
-    
     book_cover = serializers.ImageField(source='book.cover_image', read_only=True)
     book_synopsis = serializers.CharField(source='book.synopsis', read_only=True)
-    
     book_category = serializers.CharField(source='book.category', read_only=True)
 
     class Meta:

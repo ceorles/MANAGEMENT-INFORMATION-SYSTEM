@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaQuestionCircle, FaCheckCircle } from 'react-icons/fa';
 import StudentNavbar from '../components/StudentNavbar';
 import '../styles/Student.css';
 
 const StudentReturn = () => {
     const [borrowedBooks, setBorrowedBooks] = useState([]);
-    const [searchTerm, setSearchTerm] = useState(''); // Search State
+    const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
     
-    // Modal State
+    // --- MODAL STATES ---
     const [showReadModal, setShowReadModal] = useState(false);
+    const [showReturnModal, setShowReturnModal] = useState(false); 
+    const [showSuccessReturnModal, setShowSuccessReturnModal] = useState(false);
+    
     const [selectedBook, setSelectedBook] = useState(null); 
+    const [recordToReturn, setRecordToReturn] = useState(null);
 
     const categories = [
         { key: 'Academic', label: 'Academic / Educational' },
@@ -27,7 +31,7 @@ const StudentReturn = () => {
     }, []);
 
     const fetchBorrowedBooks = async () => {
-        const token = localStorage.getItem('access_token');
+        const token = sessionStorage.getItem('access_token');
         try {
             const response = await fetch('http://127.0.0.1:8000/api/student/borrowed-books/', {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -45,10 +49,15 @@ const StudentReturn = () => {
         }
     };
 
-    const handleReturn = async (recordId) => {
-        if (!window.confirm("Are you sure you want to return this book?")) return;
+    const handleReturnClick = (recordId) => {
+        setRecordToReturn(recordId);
+        setShowReturnModal(true);
+    };
 
-        const token = localStorage.getItem('access_token');
+    const confirmReturn = async () => {
+        if (!recordToReturn) return;
+
+        const token = sessionStorage.getItem('access_token');
         try {
             const response = await fetch('http://127.0.0.1:8000/api/return/', {
                 method: 'POST',
@@ -56,12 +65,14 @@ const StudentReturn = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}` 
                 },
-                body: JSON.stringify({ record_id: recordId })
+                body: JSON.stringify({ record_id: recordToReturn })
             });
 
             if (response.ok) {
-                alert("Book returned successfully!");
+                setShowReturnModal(false);
+                setRecordToReturn(null);
                 fetchBorrowedBooks(); 
+                setShowSuccessReturnModal(true);
             } else {
                 alert("Failed to return book.");
             }
@@ -76,7 +87,6 @@ const StudentReturn = () => {
         return `http://127.0.0.1:8000${path}`;
     };
 
-    // based on search
     const filteredRecords = borrowedBooks.filter(r => 
         r.book_title.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -130,7 +140,7 @@ const StudentReturn = () => {
                             }}>
                                 Read
                             </button>
-                            <button className="action-btn-brown" onClick={() => handleReturn(record.id)}>
+                            <button className="action-btn-brown" onClick={() => handleReturnClick(record.id)}>
                                 Return
                             </button>
                         </>
@@ -153,8 +163,6 @@ const StudentReturn = () => {
         <div>
             <StudentNavbar />
             <div className="student-container">
-                
-                {/* SEARCH BAR */}
                 <div className="search-wrapper">
                     <FaSearch className="search-icon"/>
                     <input 
@@ -177,9 +185,8 @@ const StudentReturn = () => {
                             </div>
                         ) : (
                             categories.map(cat => {
-                                // borrowed books by category
                                 const recordsInCat = borrowedBooks.filter(r => r.book_category === cat.key);
-                                if (recordsInCat.length === 0) return null; // Hide empty categories
+                                if (recordsInCat.length === 0) return null;
 
                                 return (
                                     <div key={cat.key} className="category-section">
@@ -197,7 +204,7 @@ const StudentReturn = () => {
                 )}
             </div>
 
-            {/* READ MODAL */}
+            {/* read sypnosis */}
             {showReadModal && (
                 <div className="modal-overlay">
                     <div className="modal-box" style={{textAlign:'left'}}>
@@ -214,6 +221,42 @@ const StudentReturn = () => {
                     </div>
                 </div>
             )}
+
+            {/* confirm pop out box */}
+            {showReturnModal && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <FaQuestionCircle size={50} color="#8B6508" style={{marginBottom: '15px'}} />
+                        <h3 className="modal-header">Return Book</h3>
+                        <p className="modal-text">Are you sure you want to return this book?</p>
+                        
+                        <div style={{display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '20px'}}>
+                            <button 
+                                onClick={() => setShowReturnModal(false)}
+                                style={{backgroundColor: '#ccc', color: '#333', padding: '10px 30px', border: 'none', borderRadius: '25px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px'}}
+                            >
+                                Cancel
+                            </button>
+                            <button onClick={confirmReturn} className="btn-modal-ok">OK</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* success pop out box*/}
+            {showSuccessReturnModal && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <FaCheckCircle size={50} color="#8B6508" style={{marginBottom: '10px'}} />
+                        <h3 className="modal-header">Success!</h3>
+                        <p className="modal-text">Book returned successfully!</p>
+                        <button className="btn-modal-ok" onClick={() => setShowSuccessReturnModal(false)}>
+                            OK
+                        </button>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

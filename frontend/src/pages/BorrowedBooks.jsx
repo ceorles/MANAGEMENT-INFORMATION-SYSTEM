@@ -7,7 +7,6 @@ const BorrowedBooks = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Replace with actual API endpoint and authentication as needed
     axios.get('/api/borrowed-books/')
       .then(response => {
         setBooks(response.data);
