@@ -135,13 +135,13 @@ const LibrarianSidebar = () => {
                     <div 
                         className="avatar-circle" 
                         onClick={handleImageClick} 
-                        style={{cursor: 'pointer', position: 'relative', display: 'inline-block', boxShadow: '0 4px 16px rgba(139,101,8,0.12)', background: 'rgba(255,255,255,0.90)', borderRadius: '50%', padding: 6, border: '2px solid #d4af37'}}
+                        style={{cursor: 'pointer', position: 'relative', display: 'inline-block'}}
                         title="Click to change profile picture"
                     >
                         {profileImage ? (
-                            <img src={profileImage} alt="Profile" style={{width:'56px', height:'56px', objectFit:'cover', borderRadius:'50%', border: '2px solid #d4af37', boxShadow: '0 2px 8px #f7e9c4'}} />
+                            <img src={profileImage} alt="Profile" style={{width:'80px', height:'80px', objectFit:'cover', borderRadius:'50%'}} />
                         ) : (
-                            <img src="https://via.placeholder.com/56" alt="Default" style={{width:'56px', height:'56px', objectFit:'cover', borderRadius:'50%', border: '2px solid #d4af37', boxShadow: '0 2px 8px #f7e9c4'}} />
+                            <img src="https://via.placeholder.com/80" alt="Default" style={{width:'80px', height:'80px', objectFit:'cover', borderRadius:'50%'}} />
                         )}
                         <input 
                             type="file" 
@@ -153,7 +153,7 @@ const LibrarianSidebar = () => {
                         <div style={{
                             position: 'absolute', bottom: '0', right: '0', 
                             background: 'linear-gradient(135deg, #d4af37 0%, #8B6508 100%)', borderRadius: '50%', 
-                            padding: '6px', color: 'white', fontSize: '13px', boxShadow: '0 2px 8px #f7e9c4', border: '2px solid #fff'
+                            padding: '6px', color: 'white', fontSize: '13px', boxShadow: '0 2px 8px #f7e9c4'
                         }}>
                             <FaCamera />
                         </div>

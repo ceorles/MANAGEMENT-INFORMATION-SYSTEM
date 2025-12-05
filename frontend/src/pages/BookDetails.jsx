@@ -42,7 +42,14 @@ const BookDetails = () => {
         return `http://127.0.0.1:8000${path}`;
     };
 
-    if (!book) return <div>Loading...</div>;
+    if (!book) return (
+        <div className="loading-screen">
+            <div className="glass-container">
+                <div className="spinner"></div>
+                <p>Loading book details...</p>
+            </div>
+        </div>
+    );
 
     return (
         <div>
@@ -81,24 +88,24 @@ const BookDetails = () => {
                             </button>
                         </div>
                     </div>
+                </div>
 
-                    <div className="more-like-this modern-more-like">
-                        <hr />
-                        <h3>More like this</h3>
-                        <div className="mini-grid modern-mini-grid">
-                            {relatedBooks.map(b => (
-                                <Link key={b.id} to={`/student/book/${b.id}`} className="mini-card modern-mini-card">
-                                    {b.cover_image ? (
-                                        <img 
-                                            src={getImageUrl(b.cover_image)} 
-                                            alt={b.title} 
-                                        />
-                                    ) : <div className="no-cover-mini"></div>}
-                                    <p>{b.title}</p>
-                                    <span>{b.author}</span>
-                                </Link>
-                            ))}
-                        </div>
+                <div className="more-like-this modern-more-like">
+                    <hr />
+                    <h3>More like this</h3>
+                    <div className="scrollable-container">
+                        {relatedBooks.map(b => (
+                            <Link key={b.id} to={`/student/book/${b.id}`} className="mini-card modern-mini-card">
+                                {b.cover_image ? (
+                                    <img 
+                                        src={getImageUrl(b.cover_image)} 
+                                        alt={b.title} 
+                                    />
+                                ) : <div className="no-cover-mini"></div>}
+                                <p>{b.title}</p>
+                                <span>{b.author}</span>
+                            </Link>
+                        ))}
                     </div>
                 </div>
             </div>

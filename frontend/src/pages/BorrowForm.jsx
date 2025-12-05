@@ -87,7 +87,14 @@ const BorrowForm = () => {
         return `http://127.0.0.1:8000${path}`;
     };
 
-    if (!book) return <div>Loading...</div>;
+    if (!book) return (
+        <div className="loading-screen">
+            <div className="glass-container">
+                <div className="spinner"></div>
+                <p>Loading book details...</p>
+            </div>
+        </div>
+    );
 
     return (
         <div>

@@ -19,7 +19,14 @@ const BorrowedBooks = () => {
       });
   }, []);
 
-  if (loading) return <div>Loading borrowed books...</div>;
+  if (loading) return (
+    <div className="loading-screen">
+        <div className="glass-container">
+            <div className="spinner"></div>
+            <p>Loading borrowed books...</p>
+        </div>
+    </div>
+  );
   if (error) return <div>{error}</div>;
 
   return (
