@@ -4,6 +4,7 @@ import autoTable from 'jspdf-autotable';
 import LibrarianSidebar from '../components/LibrarianSidebar';
 import { FaCheck, FaTimes, FaPrint, FaDownload, FaCheckCircle } from 'react-icons/fa'; 
 import '../styles/Dashboard.css';
+import { API_URL } from '../apiConfig';
 
 const IssueReturn = () => {
     const [transactions, setTransactions] = useState([]);
@@ -18,7 +19,7 @@ const IssueReturn = () => {
     const fetchTransactions = async () => {
         const token = sessionStorage.getItem('access_token');
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/transactions/', {
+            const response = await fetch(`${API_URL}/api/transactions/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -30,7 +31,7 @@ const IssueReturn = () => {
 
     const handleAction = async (recordId, action) => {
         const token = sessionStorage.getItem('access_token');
-        const response = await fetch('http://127.0.0.1:8000/api/manage-request/', {
+        const response = await fetch(`${API_URL}/api/manage-request/`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',

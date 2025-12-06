@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../apiConfig';
 
 const BorrowedBooks = () => {
   const [books, setBooks] = useState([]);
@@ -7,7 +8,7 @@ const BorrowedBooks = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios.get('/api/borrowed-books/')
+    axios.get(`${API_URL}/api/borrowed-books/`)
       .then(response => {
         setBooks(response.data);
         setLoading(false);

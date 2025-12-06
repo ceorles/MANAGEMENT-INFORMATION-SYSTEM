@@ -5,6 +5,7 @@ import { FaTrash, FaPlus, FaCheckCircle, FaPrint, FaDownload, FaExclamationCircl
 import LibrarianSidebar from '../components/LibrarianSidebar';
 import LoadingScreen from '../components/LoadingScreen';
 import '../styles/Dashboard.css';
+import { API_URL } from '../apiConfig';
 
 const ManageCatalog = () => {
     const [books, setBooks] = useState([]);
@@ -29,7 +30,7 @@ const ManageCatalog = () => {
     const fetchBooks = async () => {
         const token = sessionStorage.getItem('access_token');
         try {
-            const res = await fetch('http://127.0.0.1:8000/api/books/manage/', {
+            const res = await fetch(`${API_URL}/api/books/manage/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -52,7 +53,7 @@ const ManageCatalog = () => {
         setIsLoading(true); // loading
 
         const token = sessionStorage.getItem('access_token');
-        await fetch(`http://127.0.0.1:8000/api/books/manage/${bookToDelete}/`, {
+        await fetch(`${API_URL}/api/books/manage/${bookToDelete}/`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -85,7 +86,7 @@ const ManageCatalog = () => {
             data.append('cover_image', formData.cover_image);
         }
 
-        const response = await fetch('http://127.0.0.1:8000/api/books/manage/', {
+        const response = await fetch(`${API_URL}/api/books/manage/`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` },
             body: data

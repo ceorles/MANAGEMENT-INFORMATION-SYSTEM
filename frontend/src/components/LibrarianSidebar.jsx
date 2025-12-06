@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import logo from '../assets/logo.png';
 import LoadingScreen from './LoadingScreen';
 import '../styles/Dashboard.css';
+import { API_URL } from '../apiConfig';
 
 const LibrarianSidebar = () => {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
@@ -41,13 +42,13 @@ const LibrarianSidebar = () => {
     const getImageUrl = (path) => {
         if (!path) return null;
         if (path.startsWith('http')) return path;
-        return `http://127.0.0.1:8000${path}`;
+        return `${API_URL}${path}`;
     };
 
     const fetchProfileImage = async () => {
         const token = sessionStorage.getItem('access_token');
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/librarian/profile/', {
+            const response = await fetch(`${API_URL}/api/librarian/profile/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -68,7 +69,7 @@ const LibrarianSidebar = () => {
         formData.append('profile_picture', file);
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/librarian/profile/', {
+            const response = await fetch(`${API_URL}/api/librarian/profile/`, {
                 method: 'PATCH', 
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData

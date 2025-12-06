@@ -4,6 +4,7 @@ import StudentNavbar from '../components/StudentNavbar';
 import LoadingScreen from '../components/LoadingScreen';
 import { FaChevronLeft } from 'react-icons/fa';
 import '../styles/Student.css'; 
+import { API_URL } from '../apiConfig';
 import '../styles/BookDetails.css';
 
 const BookDetails = () => {
@@ -20,14 +21,14 @@ const BookDetails = () => {
         const token = sessionStorage.getItem('access_token');
         
         try {
-            const res = await fetch(`http://127.0.0.1:8000/api/books/${id}/`, {
+            const res = await fetch(`${API_URL}/api/books/${id}/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
             setBook(data);
 
             if (data.category) {
-                const resRel = await fetch(`http://127.0.0.1:8000/api/books/related/?category=${data.category}&book_id=${data.id}`, {
+                const resRel = await fetch(`${API_URL}/api/books/related/?category=${data.category}&book_id=${data.id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const dataRel = await resRel.json();
@@ -45,7 +46,7 @@ const BookDetails = () => {
     const getImageUrl = (path) => {
         if (!path) return null;
         if (path.startsWith('http')) return path;
-        return `http://127.0.0.1:8000${path}`;
+        return `${API_URL}${path}`;
     };
 
     if (!book) return <LoadingScreen />;

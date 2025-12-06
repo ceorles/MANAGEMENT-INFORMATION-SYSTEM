@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import StudentNavbar from '../components/StudentNavbar';
 import { FaSearch } from 'react-icons/fa';
 import '../styles/Student.css'; 
+import { API_URL } from '../apiConfig';
 
 const StudentDashboard = () => {
     const [books, setBooks] = useState([]);
@@ -25,7 +26,7 @@ const StudentDashboard = () => {
         const token = sessionStorage.getItem('access_token');
         
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/books/', {
+            const response = await fetch(`${API_URL}/api/books/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -92,7 +93,7 @@ const StudentDashboard = () => {
 const getImageUrl = (path) => {
     if (!path) return null;
     if (path.startsWith('http')) return path;
-    return `http://127.0.0.1:8000${path}`;
+    return `${API_URL}${path}`;
 };
 
 const BookCard = ({ book }) => (

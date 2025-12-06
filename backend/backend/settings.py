@@ -33,7 +33,7 @@ DEBUG = False
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
 
-ALLOWED_HOSTS = ['libyte.pythonanywhere.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'libyte.pythonanywhere.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware', # Corsheader - don't fking remove comment
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -56,7 +57,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware', # Corsheader - don't fking remove comment
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -155,7 +155,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Add this to allow React (localhost:3000) to talk to Django
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://libyte.pythonanywhere.com", # Add your production domain
+    "http://127.0.0.1:3000",  # Add this just to be safe
+    "https://libyte.pythonanywhere.com", # Keeping this is fine!
 ]
+
+# CORS_ALLOW_ALL_ORIGINS = True
 
 #AUTH_USER_MODEL = 'library.User'

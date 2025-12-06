@@ -5,6 +5,7 @@ import { FaEdit, FaTrash, FaPrint, FaDownload } from 'react-icons/fa';
 import LibrarianSidebar from '../components/LibrarianSidebar';
 import LoadingScreen from '../components/LoadingScreen';
 import '../styles/Dashboard.css';
+import { API_URL } from '../apiConfig';
 
 const Members = () => {
     const [members, setMembers] = useState([]); // members
@@ -27,7 +28,7 @@ const Members = () => {
     const fetchMembers = async () => {
         const token = sessionStorage.getItem('access_token');
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/members/', {
+            const response = await fetch(`${API_URL}/api/members/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -47,7 +48,7 @@ const Members = () => {
 
         const token = sessionStorage.getItem('access_token');
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/members/${selectedMember.student_id}/`, {
+            const response = await fetch(`${API_URL}/api/members/${selectedMember.student_id}/`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -78,7 +79,7 @@ const Members = () => {
         };
         if (editFormData.password.trim() !== "") payload.password = editFormData.password;
 
-        const response = await fetch(`http://127.0.0.1:8000/api/members/${selectedMember.student_id}/`, {
+        const response = await fetch(`${API_URL}/api/members/${selectedMember.student_id}/`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify(payload)

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaSearch, FaQuestionCircle, FaCheckCircle } from 'react-icons/fa';
 import StudentNavbar from '../components/StudentNavbar';
 import '../styles/Student.css';
+import { API_URL } from '../apiConfig';
 
 const StudentReturn = () => {
     const [borrowedBooks, setBorrowedBooks] = useState([]);
@@ -33,7 +34,7 @@ const StudentReturn = () => {
     const fetchBorrowedBooks = async () => {
         const token = sessionStorage.getItem('access_token');
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/student/borrowed-books/', {
+            const response = await fetch(`${API_URL}/api/student/borrowed-books/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -59,7 +60,7 @@ const StudentReturn = () => {
 
         const token = sessionStorage.getItem('access_token');
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/return/', {
+            const response = await fetch(`${API_URL}/api/return/`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -84,7 +85,7 @@ const StudentReturn = () => {
     const getImageUrl = (path) => {
         if (!path) return null;
         if (path.startsWith('http')) return path; 
-        return `http://127.0.0.1:8000${path}`;
+        return `${API_URL}${path}`;
     };
 
     const filteredRecords = borrowedBooks.filter(r => 

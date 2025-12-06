@@ -5,6 +5,7 @@ import { FaChevronLeft, FaCheckCircle, FaExclamationCircle } from 'react-icons/f
 import { jwtDecode } from "jwt-decode";
 import '../styles/Student.css';
 import LoadingScreen from '../components/LoadingScreen';
+import { API_URL } from '../apiConfig';
 
 const BorrowForm = () => {
     const { id } = useParams();
@@ -39,7 +40,7 @@ const BorrowForm = () => {
         // --------------------------------------
 
         const fetchBook = async () => {
-            const response = await fetch(`http://127.0.0.1:8000/api/books/${id}/`, {
+            const response = await fetch(`${API_URL}/api/books/${id}/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -61,7 +62,7 @@ const BorrowForm = () => {
         const token = sessionStorage.getItem('access_token');
         
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/borrow/', {
+            const response = await fetch(`${API_URL}/api/borrow/`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -97,7 +98,7 @@ const BorrowForm = () => {
     const getImageUrl = (path) => {
         if (!path) return null;
         if (path.startsWith('http')) return path;
-        return `http://127.0.0.1:8000${path}`;
+        return `${API_URL}${path}`;
     };
 
     if (!book) return <LoadingScreen />;

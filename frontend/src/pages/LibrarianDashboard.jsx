@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import LibrarianSidebar from '../components/LibrarianSidebar';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import '../styles/Dashboard.css';
+import { API_URL } from '../apiConfig';
 
 const LibrarianDashboard = () => {
     const [stats, setStats] = useState({
@@ -19,7 +20,7 @@ const LibrarianDashboard = () => {
     const fetchStats = async () => {
         const token = sessionStorage.getItem('access_token');
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/dashboard/stats/', {
+            const response = await fetch(`${API_URL}/api/dashboard/stats/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();

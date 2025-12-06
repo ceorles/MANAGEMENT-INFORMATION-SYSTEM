@@ -5,6 +5,7 @@ import { FaArrowLeft, FaExclamationCircle } from 'react-icons/fa';
 import '../styles/Login.css';
 import { jwtDecode } from "jwt-decode";
 import LoadingScreen from '../components/LoadingScreen';
+import { API_URL } from '../apiConfig';
 
 const Login = ({ userType }) => {
     const [formData, setFormData] = useState({ username: '', password: '' });
@@ -21,8 +22,10 @@ const Login = ({ userType }) => {
         e.preventDefault();
         setIsLoading(true); // loading
 
+        console.log("Attempting to login to:", `${API_URL}/api/login/`); 
+
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/login/', {
+            const response = await fetch(`${API_URL}/api/login/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)

@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import logo from '../assets/logo.png';
 import LoadingScreen from './LoadingScreen';
 import '../styles/Student.css'; 
+import { API_URL } from '../apiConfig';
 
 const StudentNavbar = () => {
     const navigate = useNavigate();

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
 import '../styles/Login.css';
+import { API_URL } from '../apiConfig';
 
 const Signup = ({ userType }) => {
     const navigate = useNavigate();
@@ -26,8 +27,8 @@ const Signup = ({ userType }) => {
         e.preventDefault();
         
         const apiUrl = userType === 'student' 
-            ? 'http://127.0.0.1:8000/api/signup/student/' 
-            : 'http://127.0.0.1:8000/api/signup/librarian/';
+            ? `${API_URL}/api/signup/student/` 
+            : `${API_URL}/api/signup/librarian/`;
 
         try {
             const response = await fetch(apiUrl, {
