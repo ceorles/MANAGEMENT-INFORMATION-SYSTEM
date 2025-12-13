@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { FaTrash, FaPlus, FaCheckCircle, FaPrint, FaDownload, FaExclamationCircle } from 'react-icons/fa';
+import { FaTrash, FaEdit, FaPlus, FaMinus, FaCheckCircle, FaPrint, FaDownload, FaExclamationCircle } from 'react-icons/fa';
 import LibrarianSidebar from '../components/LibrarianSidebar';
 import LoadingScreen from '../components/LoadingScreen';
 import '../styles/Dashboard.css';
@@ -9,13 +9,23 @@ import { API_URL } from '../apiConfig';
 
 const ManageCatalog = () => {
     const [books, setBooks] = useState([]);
-    const [showSuccessModal, setShowSuccessModal] = useState(false); // success pop out box
-    const [showDeleteModal, setShowDeleteModal] = useState(false); // pop out box delete
-    const [bookToDelete, setBookToDelete] = useState(null); // delete
-    const [isLoading, setIsLoading] = useState(false); // loading
+    
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    
+    const [bookToDelete, setBookToDelete] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
+    // add form
     const [formData, setFormData] = useState({
         title: '', author: '', isbn: '', quantity: 1, category: 'Fiction', synopsis: '', cover_image: null
+    });
+
+    // edit form
+    const [editData, setEditData] = useState({
+        id: null, title: '', author: '', category: 'Fiction', quantity: 0
     });
 
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -40,17 +50,16 @@ const ManageCatalog = () => {
         }
     };
 
+    // deleting logic
     const handleDeleteClick = (id) => {
         setBookToDelete(id);
         setShowDeleteModal(true);
     };
 
-    // confirmation
     const confirmDelete = async () => {
         if (!bookToDelete) return;
-        
         setShowDeleteModal(false);
-        setIsLoading(true); // loading
+        setIsLoading(true);
 
         const token = sessionStorage.getItem('access_token');
         await fetch(`${API_URL}/api/books/manage/${bookToDelete}/`, {
@@ -65,14 +74,65 @@ const ManageCatalog = () => {
         }, 1000);
     };
 
+    // editing logic
+    const handleEditClick = (book) => {
+        setEditData({
+            id: book.id,
+            title: book.title,
+            author: book.author,
+            category: book.category,
+            quantity: book.quantity
+        });
+        setShowEditModal(true);
+    };
+
+    const updateQuantity = (amount) => {
+        setEditData(prev => ({
+            ...prev,
+            quantity: Math.max(0, prev.quantity + amount) // prevent negative
+        }));
+    };
+
+    const confirmEdit = async () => {
+        setShowEditModal(false);
+        setIsLoading(true);
+        const token = sessionStorage.getItem('access_token');
+
+        const payload = {
+            title: editData.title,
+            author: editData.author,
+            category: editData.category,
+            quantity: editData.quantity
+        };
+
+        const response = await fetch(`${API_URL}/api/books/manage/${editData.id}/`, {
+            method: 'PATCH',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            setTimeout(() => {
+                fetchBooks();
+                setIsLoading(false);
+                alert("Book updated successfully!");
+            }, 1000);
+        } else {
+            setIsLoading(false);
+            alert("Failed to update book.");
+        }
+    };
+
     const handleFileChange = (e) => {
         setFormData({ ...formData, cover_image: e.target.files[0] });
     };
 
-    // add books
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsLoading(true); // loading
+        setIsLoading(true);
         const token = sessionStorage.getItem('access_token');
 
         const data = new FormData();
@@ -111,25 +171,34 @@ const ManageCatalog = () => {
     const handleDownloadPDF = () => {
         const doc = new jsPDF();
         doc.text("Libyte Book Catalog", 14, 10);
-        const tableColumn = ["Title", "Author", "Category", "Qty", "ISBN"];
+        const tableColumn = ["Title", "Author", "Category", "Qty"];
         const tableRows = [];
         books.forEach(b => {
-            tableRows.push([b.title, b.author, b.category, b.quantity, b.isbn]);
+            tableRows.push([b.title, b.author, b.category, b.quantity]);
         });
         autoTable(doc, { head: [tableColumn], body: tableRows, startY: 20 });
         doc.save("Libyte_Catalog.pdf");
     };
 
-    if (isLoading) return <LoadingScreen />; // loader
+    // --- FILTER LOGIC ---
+    const filteredBooks = books.filter(b => 
+        b.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        b.author.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (isLoading) return <LoadingScreen />;
 
     return (
         <div className="dashboard-container">
             <LibrarianSidebar />
             <div className="main-content-fluid">
-                <div className="full-width-card" style={{ marginBottom: '30px', borderTop: '5px solid #8B6508' }}>
+                
+                {/* --- ADD BOOK FORM --- */}
+                <div className="full-width-card no-print" style={{ marginBottom: '30px', borderTop: '5px solid #8B6508' }}>
                     <div className="card-header-row">
                         <h2 className="page-title">Add New Book</h2>
                     </div>
+                    
                     <form onSubmit={handleSubmit} style={{display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '30px', marginTop: '10px'}}>
                         <div>
                             <label style={{display:'block', fontWeight:'bold', marginBottom:'8px', color:'#8B6508'}}>Title:</label>
@@ -170,11 +239,21 @@ const ManageCatalog = () => {
                     </form>
                 </div>
 
-                {/* book list */}
+                {/* --- BOOK LIST TABLE --- */}
                 <div className="full-width-card">
                     <div className="card-header-row">
                         <h2 className="page-title">Book Catalog List</h2>
+                        
+                        {/* SEARCH BAR */}
+                        <input 
+                            type="text" 
+                            placeholder="Search book title or author..." 
+                            className="search-input"
+                            style={{width: '300px'}}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
+
                     <div className="table-responsive">
                         <table className="modern-table">
                             <thead>
@@ -187,14 +266,26 @@ const ManageCatalog = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {books.map((b) => (
+                                {filteredBooks.map((b) => (
                                     <tr key={b.id}>
                                         <td><strong>{b.title}</strong></td>
                                         <td>{b.author}</td>
                                         <td><span style={{background:'#fffbe6', padding:'4px 10px', borderRadius:'10px', border:'1px solid #e0d4b8', fontSize:'13px', color:'#8B6508'}}>{b.category}</span></td>
                                         <td>{b.quantity}</td>
                                         <td style={{textAlign:'center'}}>
-                                            <button className="icon-btn delete" onClick={() => handleDeleteClick(b.id)}>
+                                            {/* NEW EDIT BUTTON */}
+                                            <button 
+                                                className="icon-btn edit" 
+                                                onClick={() => handleEditClick(b)}
+                                                style={{marginRight:'10px'}}
+                                            >
+                                                <FaEdit />
+                                            </button>
+                                            
+                                            <button 
+                                                className="icon-btn delete" 
+                                                onClick={() => handleDeleteClick(b.id)}
+                                            >
                                                 <FaTrash />
                                             </button>
                                         </td>
@@ -210,26 +301,67 @@ const ManageCatalog = () => {
                 </div>
             </div>
 
+            {/* --- MODALS --- */}
+            
+            {/* SUCCESS */}
             {showSuccessModal && (
                 <div className="modal-overlay">
                     <div className="modal-box">
                         <FaCheckCircle size={50} color="#8B6508" style={{marginBottom: '10px'}} />
                         <h3 className="modal-header">Success!</h3>
-                        <p className="modal-text">New book has been added to the catalog.</p>
+                        <p className="modal-text">Action completed successfully.</p>
                         <button className="btn-confirm" onClick={() => setShowSuccessModal(false)}>OK</button>
                     </div>
                 </div>
             )}
 
+            {/* DELETE */}
             {showDeleteModal && (
                 <div className="modal-overlay">
                     <div className="modal-box">
                         <FaExclamationCircle size={50} color="#cc0000" style={{marginBottom: '10px'}} />
                         <h3 className="modal-header" style={{color: '#cc0000'}}>Delete Book?</h3>
-                        <p className="modal-text">Are you sure you want to delete this book? This action cannot be undone.</p>
+                        <p className="modal-text">Are you sure? This action cannot be undone.</p>
                         <div className="modal-actions">
                             <button className="btn-cancel" onClick={() => setShowDeleteModal(false)}>Cancel</button>
                             <button className="btn-delete-confirm" onClick={confirmDelete}>Delete</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* EDIT MODAL */}
+            {showEditModal && (
+                <div className="modal-overlay">
+                    <div className="modal-box" style={{width: '500px', textAlign:'left'}}>
+                        <h3 className="modal-header">Edit Book Details</h3>
+                        
+                        <label style={{fontWeight:'bold'}}>Title:</label>
+                        <input type="text" className="modal-input" value={editData.title} onChange={e => setEditData({...editData, title: e.target.value})} />
+
+                        <label style={{fontWeight:'bold'}}>Author:</label>
+                        <input type="text" className="modal-input" value={editData.author} onChange={e => setEditData({...editData, author: e.target.value})} />
+
+                        <label style={{fontWeight:'bold'}}>Category:</label>
+                        <select className="modal-input" value={editData.category} onChange={e => setEditData({...editData, category: e.target.value})}>
+                            <option value="Fiction">Fiction</option>
+                            <option value="Academic">Academic</option>
+                            <option value="Non-Fiction">Non-Fiction</option>
+                            <option value="Modern">Modern Literature</option>
+                            <option value="Graphic">Graphic Literature</option>
+                            <option value="Children">Children Books</option>
+                        </select>
+
+                        <label style={{fontWeight:'bold'}}>Stock Quantity:</label>
+                        <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom:'20px'}}>
+                            <button className="icon-btn delete" onClick={() => updateQuantity(-1)}><FaMinus /></button>
+                            <input type="number" className="modal-input" style={{marginBottom:0, textAlign:'center', width:'80px'}} value={editData.quantity} readOnly />
+                            <button className="icon-btn edit" onClick={() => updateQuantity(1)}><FaPlus /></button>
+                        </div>
+
+                        <div className="modal-actions">
+                            <button className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancel</button>
+                            <button className="btn-confirm" onClick={confirmEdit}>Save Changes</button>
                         </div>
                     </div>
                 </div>

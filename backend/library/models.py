@@ -43,7 +43,7 @@ class Book(models.Model):
     
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='Fiction')
     synopsis = models.TextField(blank=True, null=True)
-    cover_image = models.ImageField(upload_to='book_covers/', blank=True, null=True) # Requires Pillow
+    cover_image = models.ImageField(upload_to='book_covers/', blank=True, null=True) # pip install pillow
 
     def __str__(self):
         return self.title
@@ -51,6 +51,7 @@ class Book(models.Model):
 class BorrowRecord(models.Model):
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
+        ('Verifying', 'Verifying'), # verifying daw, sabi ni sir Rovie Balingbing - github.com/itzzmerov
         ('Approved', 'Approved'),
         ('Returned', 'Returned'),
         ('Rejected', 'Rejected'),

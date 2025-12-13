@@ -2,15 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import LibrarianSidebar from '../components/LibrarianSidebar';
-import { FaCheck, FaTimes, FaPrint, FaDownload, FaCheckCircle } from 'react-icons/fa'; 
+import { FaCheck, FaTimes, FaPrint, FaDownload, FaCheckCircle, FaUndo, FaQuestionCircle } from 'react-icons/fa'; 
 import '../styles/Dashboard.css';
 import { API_URL } from '../apiConfig';
 
 const IssueReturn = () => {
     const [transactions, setTransactions] = useState([]);
     
+    // --- MODAL STATES ---
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    
     const [modalMessage, setModalMessage] = useState('');
+    const [recordToReturn, setRecordToReturn] = useState(null); // storing id for record
 
     useEffect(() => {
         fetchTransactions();
@@ -29,8 +33,16 @@ const IssueReturn = () => {
         }
     };
 
+    // pop out box confirmation
+    const clickReturnButton = (recordId) => {
+        setRecordToReturn(recordId);
+        setShowConfirmModal(true);
+    };
+
+    // executor
     const handleAction = async (recordId, action) => {
         const token = sessionStorage.getItem('access_token');
+
         const response = await fetch(`${API_URL}/api/manage-request/`, {
             method: 'POST',
             headers: { 
@@ -41,7 +53,18 @@ const IssueReturn = () => {
         });
 
         if (response.ok) {
-            setModalMessage(`Book has been ${action}ed successfully!`);
+            let msg = '';
+            if (action === 'approve') msg = "Request Accepted! Status set to Verifying.";
+            else if (action === 'reject') msg = "Request Rejected.";
+            else if (action === 'return') msg = "Book Marked as Returned.";
+            
+            setModalMessage(msg);
+            
+            // confirm pop out box
+            setShowConfirmModal(false);
+            setRecordToReturn(null);
+
+            // success pop out box
             setShowSuccessModal(true);
             fetchTransactions();
         }
@@ -103,10 +126,12 @@ const IssueReturn = () => {
                                                 fontWeight: 'bold',
                                                 backgroundColor: 
                                                     t.status === 'Pending' ? '#fff3cd' : 
+                                                    t.status === 'Verifying' ? '#e2e3e5' : 
                                                     t.status === 'Approved' ? '#d4edda' : 
                                                     t.status === 'Returned' ? '#cce5ff' : '#f8d7da',
                                                 color: 
                                                     t.status === 'Pending' ? '#856404' : 
+                                                    t.status === 'Verifying' ? '#383d41' : 
                                                     t.status === 'Approved' ? '#155724' : 
                                                     t.status === 'Returned' ? '#004085' : '#721c24'
                                             }}>
@@ -114,7 +139,8 @@ const IssueReturn = () => {
                                             </span>
                                         </td>
                                         <td style={{textAlign: 'center'}}>
-                                            {t.status === 'Pending' ? (
+                                            
+                                            {t.status === 'Pending' && (
                                                 <div style={{display:'flex', justifyContent:'center', gap:'8px'}}>
                                                     <button onClick={() => handleAction(t.id, 'approve')} style={{
                                                         background:'rgba(46,125,50,0.12)',
@@ -145,17 +171,36 @@ const IssueReturn = () => {
                                                         <FaTimes /> Reject
                                                     </button>
                                                 </div>
-                                            ) : (
+                                            )}
+
+                                            {t.status === 'Approved' && (
+                                                <div style={{display:'flex', justifyContent:'center'}}>
+                                                    <button 
+                                                        onClick={() => clickReturnButton(t.id)}
+                                                        style={{
+                                                            background:'#8B6508',
+                                                            color:'white',
+                                                            border:'none',
+                                                            padding:'6px 12px',
+                                                            borderRadius:'8px',
+                                                            cursor:'pointer',
+                                                            display:'flex',
+                                                            alignItems:'center',
+                                                            gap: '5px',
+                                                            fontWeight: '600'
+                                                        }}
+                                                    >
+                                                        <FaUndo /> Return
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {(t.status === 'Verifying' || t.status === 'Returned' || t.status === 'Rejected') && (
                                                 <span style={{color:'#ccc'}}>—</span>
                                             )}
                                         </td>
                                     </tr>
                                 ))}
-                                {transactions.length === 0 && (
-                                    <tr>
-                                        <td colSpan="6" className="empty-msg">No borrowing requests yet.</td>
-                                    </tr>
-                                )}
                             </tbody>
                         </table>
                     </div>
@@ -167,13 +212,38 @@ const IssueReturn = () => {
                 </div>
             </div>
 
+            {showConfirmModal && (
+                <div className="modal-overlay">
+                    <div className="modal-box">
+                        <FaQuestionCircle size={50} color="#8B6508" style={{marginBottom: '15px'}} />
+                        <h3 className="modal-header">Confirm Return</h3>
+                        <p className="modal-text">Mark this book as Returned?</p>
+                        
+                        <div style={{display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '20px'}}>
+                            <button 
+                                onClick={() => setShowConfirmModal(false)}
+                                style={{backgroundColor: '#ccc', color: '#333', padding: '10px 30px', border: 'none', borderRadius: '25px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px'}}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={() => handleAction(recordToReturn, 'return')} 
+                                className="btn-modal-ok"
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {showSuccessModal && (
                 <div className="modal-overlay">
                     <div className="modal-box">
                         <FaCheckCircle size={50} color="#8B6508" style={{marginBottom: '10px'}} />
                         <h3 className="modal-header">Success!</h3>
                         <p className="modal-text">{modalMessage}</p>
-                        <button className="btn-confirm" onClick={() => setShowSuccessModal(false)}>
+                        <button className="btn-modal-ok" onClick={() => setShowSuccessModal(false)}>
                             OK
                         </button>
                     </div>

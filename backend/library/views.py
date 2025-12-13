@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.utils import timezone
 from django.db.models import Count, Sum
-from django.db.models.functions import TruncMonth
+from django.db.models.functions import TruncMonth, TruncWeek, TruncDay
 
 from .models import Student, Librarian, Book, BorrowRecord
 from .serializers import (
@@ -23,20 +23,36 @@ class DashboardStatsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        total_books = Book.objects.count() 
+        total_books = Book.objects.count()
         total_borrowed = BorrowRecord.objects.count()
 
         top_books = Book.objects.annotate(borrow_count=Count('borrowrecord')).order_by('-borrow_count')[:3]
         top_books_data = [{"title": b.title, "count": b.borrow_count} for b in top_books]
 
-        monthly_data = (
+        filter_type = request.query_params.get('filter', 'month')
+
+        if filter_type == 'day':
+            trunc_func = TruncDay('borrow_date')
+            date_format = '%b %d'
+        elif filter_type == 'week':
+            trunc_func = TruncWeek('borrow_date')
+            date_format = 'W%W %b'
+        else:
+            trunc_func = TruncMonth('borrow_date')
+            date_format = '%b'
+
+        chart_queryset = (
             BorrowRecord.objects
-            .annotate(month=TruncMonth('borrow_date'))
-            .values('month')
+            .annotate(period=trunc_func)
+            .values('period')
             .annotate(count=Count('id'))
-            .order_by('month')
+            .order_by('period')
         )
-        chart_data = [{"name": item['month'].strftime('%b'), "loans": item['count']} for item in monthly_data]
+        
+        chart_data = [
+            {"name": item['period'].strftime(date_format), "loans": item['count']} 
+            for item in chart_queryset
+        ]
 
         recent_activity = BorrowRecord.objects.all().order_by('-borrow_date')[:5]
         recent_data = BorrowRecordSerializer(recent_activity, many=True).data
@@ -104,20 +120,34 @@ class ManageRequestView(APIView):
 
     def post(self, request):
         record_id = request.data.get('record_id')
-        action = request.data.get('action')
+        action = request.data.get('action') # approve -> verifying -> return
         
         try:
             record = BorrowRecord.objects.get(id=record_id)
+            
             if action == 'approve':
-                record.status = 'Approved'
+                # verifying shitss
+                record.status = 'Verifying'
                 record.save()
-                return Response({"message": "Book Approved"})
+                return Response({"message": "Request Accepted. Waiting for student pickup."})
+            
             elif action == 'reject':
                 record.status = 'Rejected'
                 record.save()
                 record.book.quantity += 1
                 record.book.save()
                 return Response({"message": "Book Rejected"})
+
+            elif action == 'return':
+                # librarian daw mag r-return
+                record.status = 'Returned'
+                record.is_returned = True
+                record.return_date = timezone.now().date()
+                record.save()
+                record.book.quantity += 1
+                record.book.save()
+                return Response({"message": "Book Returned Successfully"})
+                
         except BorrowRecord.DoesNotExist:
             return Response({"error": "Record not found"}, status=404)
 
@@ -182,20 +212,37 @@ class StudentBorrowedBooksView(generics.ListAPIView):
     def get_queryset(self):
         return BorrowRecord.objects.filter(student=self.request.user.student_profile).order_by('-borrow_date')
 
-class ReturnBookView(APIView):
+# class ReturnBookView(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def post(self, request):
+#         record_id = request.data.get('record_id')
+#         try:
+#             record = BorrowRecord.objects.get(id=record_id)
+#             record.status = 'Returned'
+#             record.is_returned = True
+#             record.return_date = timezone.now().date()
+#             record.save()
+
+#             record.book.quantity += 1
+#             record.book.save()
+#             return Response({"message": "Book returned!"})
+#         except:
+#             return Response({"error": "Error"}, status=400)
+        
+class StudentConfirmPickupView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         record_id = request.data.get('record_id')
         try:
-            record = BorrowRecord.objects.get(id=record_id)
-            record.status = 'Returned'
-            record.is_returned = True
-            record.return_date = timezone.now().date()
-            record.save()
-
-            record.book.quantity += 1
-            record.book.save()
-            return Response({"message": "Book returned!"})
+            record = BorrowRecord.objects.get(id=record_id, student=request.user.student_profile)
+            
+            if record.status == 'Verifying':
+                record.status = 'Approved' # Now officially borrowed
+                record.save()
+                return Response({"message": "Book Picked Up!"})
+            else:
+                return Response({"error": "Invalid status for pickup"}, status=400)
         except:
             return Response({"error": "Error"}, status=400)

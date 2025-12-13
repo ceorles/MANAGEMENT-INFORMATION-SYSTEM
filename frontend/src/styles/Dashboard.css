@@ -331,3 +331,67 @@ tr:nth-child(even) { background-color: #f9f9f9; }
     font-size: 14px;
 }
 
+@media print {
+    .sidebar, 
+    .mobile-menu-btn,
+    .card-footer-row,
+    .search-input,
+    .action-btn,
+    .modal-overlay,
+    .no-print,
+    button {
+        display: none !important;
+    }
+
+    body, 
+    .dashboard-container, 
+    .main-content-fluid, 
+    .full-width-card {
+        background: white !important;
+        background-image: none !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        position: static !important;
+        overflow: visible !important;
+    }
+
+    .table-responsive {
+        overflow: visible !important;
+    }
+
+    .modern-table {
+        width: 100% !important;
+        border: 1px solid #000 !important;
+    }
+
+    .modern-table th {
+        color: black !important;
+        background-color: #ddd !important;
+        border-bottom: 1px solid #000 !important;
+    }
+
+    .modern-table td {
+        color: black !important;
+        border-bottom: 1px solid #ccc !important;
+    }
+
+    .modern-table th:last-child,
+    .modern-table td:last-child {
+        display: none !important;
+    }
+
+    .page-title {
+        color: black !important;
+        font-size: 24px !important;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}

@@ -13,14 +13,18 @@ const LibrarianDashboard = () => {
         recent_activity: []
     });
 
+    // New State for Filter
+    const [filterType, setFilterType] = useState('month'); 
+
     useEffect(() => {
         fetchStats();
-    }, []);
+    }, [filterType]); // Re-fetch when filter changes
 
     const fetchStats = async () => {
         const token = sessionStorage.getItem('access_token');
         try {
-            const response = await fetch(`${API_URL}/api/dashboard/stats/`, {
+            // Pass the filter as a query param
+            const response = await fetch(`${API_URL}/api/dashboard/stats/?filter=${filterType}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -43,23 +47,22 @@ const LibrarianDashboard = () => {
                     <div className="stat-card" style={{backgroundColor: '#8B6508'}}>
                         <div className="stat-overlay"></div>
                     </div>
-
                     <div className="stat-card" style={{backgroundColor: '#8B6508'}}>
                         <h3>Borrowed Books</h3>
                         <h1>{stats.total_borrowed}</h1>
                     </div>
-
                     <div className="stat-card" style={{backgroundColor: '#8B6508'}}>
                         <h3>Total Books</h3>
                         <h1>{stats.total_books}</h1>
                     </div>
                 </div>
+
                 <div className="dashboard-split">
                     
                     <div className="top-books-section card" style={{padding: '25px', background: 'rgba(255,255,255,0.9)', borderTop: 'none'}}>
                         <h2 style={{color: '#8B6508', marginBottom: '20px'}}>Top Borrowed Books</h2>
                         <div className="ranking-list">
-                            {stats.top_books && stats.top_books.length > 0 ? (
+                            {stats.top_books.length > 0 ? (
                                 stats.top_books.map((book, index) => (
                                     <div key={index} className="ranking-item">
                                         <span className="rank-number">{index + 1}</span>
@@ -75,8 +78,36 @@ const LibrarianDashboard = () => {
                         </div>
                     </div>
 
+                    {/* --- CHART SECTION --- */}
                     <div className="chart-section card" style={{padding: '25px', background: 'rgba(255,255,255,0.9)', borderTop: 'none'}}>
-                        <h2 style={{color: '#8B6508', marginBottom: '20px'}}>Monthly Borrowed Books</h2>
+                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px'}}>
+                            <h2 style={{color: '#8B6508', margin:0}}>Borrowed Books Trend</h2>
+                            
+                            {/* FILTER BUTTONS */}
+                            <div style={{display:'flex', gap:'5px', background:'#eee', borderRadius:'8px', padding:'4px'}}>
+                                {['day', 'week', 'month'].map((type) => (
+                                    <button 
+                                        key={type}
+                                        onClick={() => setFilterType(type)}
+                                        style={{
+                                            border: 'none',
+                                            padding: '5px 15px',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontSize: '14px',
+                                            fontWeight: 'bold',
+                                            textTransform: 'capitalize',
+                                            backgroundColor: filterType === type ? '#8B6508' : 'transparent',
+                                            color: filterType === type ? '#fff' : '#555',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        {type}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
                         <div style={{ width: '100%', height: 300 }}>
                             <ResponsiveContainer>
                                 <LineChart data={stats.chart_data}>
@@ -102,7 +133,6 @@ const LibrarianDashboard = () => {
                     <div className="card-header-row">
                         <h2 className="page-title">Recent Issued</h2>
                     </div>
-                    
                     <div className="table-responsive">
                         <table className="modern-table">
                             <thead>
@@ -114,32 +144,24 @@ const LibrarianDashboard = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {stats.recent_activity && stats.recent_activity.length > 0 ? (
+                                {stats.recent_activity.length > 0 ? (
                                     stats.recent_activity.map(item => (
                                         <tr key={item.id}>
                                             <td><strong>{item.student_name}</strong></td>
                                             <td style={{color:'#555'}}>{item.book_title}</td>
                                             <td>{item.borrow_date}</td>
-                                            <td style={{
-                                                color: item.return_date ? '#155724' : '#856404',
-                                                fontWeight: 'bold'
-                                            }}>
+                                            <td style={{color: item.return_date ? '#155724' : '#856404', fontWeight: 'bold'}}>
                                                 {item.return_date ? item.return_date : "Pending Return"}
                                             </td>
                                         </tr>
                                     ))
                                 ) : (
-                                    <tr>
-                                        <td colSpan="4" className="empty-msg">
-                                            No recent issued records.
-                                        </td>
-                                    </tr>
+                                    <tr><td colSpan="4" className="empty-msg">No recent issued records.</td></tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
                 </div>
-
             </div>
         </div>
     );

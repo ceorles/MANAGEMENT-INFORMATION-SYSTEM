@@ -14,7 +14,8 @@ from .views import (
     BookDetailView,
     RelatedBooksView,
     StudentBorrowedBooksView,
-    ReturnBookView,
+    # ReturnBookView,
+    StudentConfirmPickupView,
     ManageRequestView,
     BookCreateView,
     BookUpdateDeleteView,
@@ -46,5 +47,6 @@ urlpatterns = [
     path('api/books/related/', RelatedBooksView.as_view(), name='related_books'),
     path('api/borrow/', BorrowBookView.as_view(), name='borrow_book'),
     path('api/student/borrowed-books/', StudentBorrowedBooksView.as_view(), name='student_borrowed'),
-    path('api/return/', ReturnBookView.as_view(), name='return_book'),
+    # path('api/return/', ReturnBookView.as_view(), name='return_book'),
+    path('api/student/pickup/', StudentConfirmPickupView.as_view(), name='student_pickup'),
 ]

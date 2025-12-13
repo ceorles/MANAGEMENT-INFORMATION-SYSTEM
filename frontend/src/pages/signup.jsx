@@ -25,6 +25,24 @@ const Signup = ({ userType }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (userType === 'student') {
+            if (!formData.student_id.startsWith("023A")) {
+                alert("Invalid Student ID. It must start with '023A' (e.g., 023A-12345).");
+                return;
+            }
+
+            const phoneRegex = /^\d{11}$/;
+            if (!phoneRegex.test(formData.contact_number)) {
+                alert("Invalid Contact Number. It must be exactly 11 digits (e.g., 09123456789).");
+                return;
+            }
+        }
+
+        if (formData.password !== formData.confirm_password) {
+            alert("Passwords do not match.");
+            return;
+        }
         
         const apiUrl = userType === 'student' 
             ? `${API_URL}/api/signup/student/` 
@@ -42,10 +60,12 @@ const Signup = ({ userType }) => {
                 alert(`${title} Account created successfully!`);
                 navigate(`/login/${userType}`); 
             } else {
-                alert("Error: " + JSON.stringify(data));
+                const errorMsg = data.detail || JSON.stringify(data);
+                alert("Registration Failed: " + errorMsg);
             }
         } catch (error) {
             console.error("Error:", error);
+            alert("Network error. Please try again later.");
         }
     };
 
@@ -70,11 +90,11 @@ const Signup = ({ userType }) => {
                     <div className="form-row-2col">
                         <div className="form-group">
                             <label>Full Name:</label>
-                            <input type="text" name="name" placeholder="Last name, First name" onChange={handleChange} required />
+                            <input type="text" name="name" placeholder="Last Name, First Name" onChange={handleChange} required />
                         </div>
                         <div className="form-group">
                             <label>Email:</label>
-                            <input type="email" name="email" placeholder="email@address.com" onChange={handleChange} required />
+                            <input type="email" name="email" placeholder="Example@gmail.com" onChange={handleChange} required />
                         </div>
                     </div>
 
@@ -82,7 +102,7 @@ const Signup = ({ userType }) => {
                     {userType === 'librarian' && (
                         <div className="form-group">
                             <label>Username:</label>
-                            <input type="text" name="username" placeholder="Create a username" onChange={handleChange} required />
+                            <input type="text" name="username" placeholder="Username" onChange={handleChange} required />
                         </div>
                     )}
 
@@ -91,11 +111,26 @@ const Signup = ({ userType }) => {
                         <div className="form-row-2col">
                             <div className="form-group">
                                 <label>Student ID:</label>
-                                <input type="text" name="student_id" placeholder="e.g. 2023-0001" onChange={handleChange} required />
+                                <input 
+                                    type="text" 
+                                    name="student_id" 
+                                    placeholder="e.g. 023A-00000" 
+                                    onChange={handleChange} 
+                                    required 
+                                    // validation helper
+                                    title="023A"
+                                />
                             </div>
                             <div className="form-group">
                                 <label>Contact Number:</label>
-                                <input type="text" name="contact_number" placeholder="+639..." onChange={handleChange} required />
+                                <input 
+                                    type="text" 
+                                    name="contact_number" 
+                                    placeholder="09xxxxxxxxx" 
+                                    onChange={handleChange} 
+                                    required 
+                                    maxLength={11}
+                                />
                             </div>
                         </div>
                     )}
@@ -115,7 +150,7 @@ const Signup = ({ userType }) => {
                     <div className="form-row-2col">
                         <div className="form-group">
                             <label>Password:</label>
-                            <input type="password" name="password" placeholder="Min 8 characters" onChange={handleChange} required />
+                            <input type="password" name="password" placeholder="Password" onChange={handleChange} required minLength={8} />
                         </div>
                         <div className="form-group">
                             <label>Confirm Password:</label>
