@@ -25,13 +25,13 @@ from .views import (
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
-    # AUTH
+    # authentication
     path('api/signup/student/', StudentSignupView.as_view(), name='student_signup'),
     path('api/signup/librarian/', LibrarianSignupView.as_view(), name='librarian_signup_api'), 
     path('api/login/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    # LIBRARIAN
+    # librarian
     path('api/dashboard/stats/', DashboardStatsView.as_view(), name='dashboard_stats'),
     path('api/members/', MemberListView.as_view(), name='member_list'),
     path('api/members/<str:student_id>/', StudentDetailView.as_view(), name='member_detail'),
@@ -41,7 +41,7 @@ urlpatterns = [
     path('api/books/manage/<int:pk>/', BookUpdateDeleteView.as_view(), name='book_update_delete'),
     path('api/librarian/profile/', LibrarianProfileView.as_view(), name='librarian_profile'),
 
-    # STUDENT
+    # student
     path('api/books/', BookListView.as_view(), name='book_list'),
     path('api/books/<int:pk>/', BookDetailView.as_view(), name='book_detail'),
     path('api/books/related/', RelatedBooksView.as_view(), name='related_books'),

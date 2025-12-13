@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from .models import Student, Librarian, Book, BorrowRecord
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-# --- AUTHENTICATION ---
+# authentication
 class StudentSignupSerializer(serializers.ModelSerializer):
     name = serializers.CharField(write_only=True)
     email = serializers.EmailField(write_only=True)

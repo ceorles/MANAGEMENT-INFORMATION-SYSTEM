@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # This connects the main project to your library app
+    # inaantok na ako
     path('', include('library.urls')), 
 ]
 
