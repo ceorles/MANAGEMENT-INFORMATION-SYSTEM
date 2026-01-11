@@ -1,0 +1,1 @@
+A Library Management System where both students and librarians can access the system. In the student dashboard, students can view all the books available in the library and request to borrow them. In the librarian dashboard, librarians can verify and approve book borrowing requests.
